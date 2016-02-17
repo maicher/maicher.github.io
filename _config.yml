@@ -9,7 +9,7 @@ baseurl: "" # the subpath of your site, e.g. /blog/
 url: "http://maicher.github.io"
 twitter_username: kmaicher
 github_username:  maicher
-permalink: pretty
+permalink: none
 paginate: 10
 
 # Build settings

@@ -2,7 +2,6 @@
 layout: post
 comments: true
 title:  "Test2"
-slug: "test2"
 date: 2016-02-15 09:26:45
 categories: ruby
 ---
