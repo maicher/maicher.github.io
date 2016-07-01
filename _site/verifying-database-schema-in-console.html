@@ -6,11 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Test2</title>
-  <meta name="description" content="You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different wa...">
+  <title>Verifying database schema in console</title>
+  <meta name="description" content="">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://maicher.github.io/ruby/test.html">
+  <link rel="canonical" href="http://maicher.github.io/verifying-database-schema-in-console.html">
   <link rel="alternate" type="application/rss+xml" title="Krzysztof Maicher" href="http://maicher.github.io/feed.xml" />
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 </head>
@@ -54,25 +54,93 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Test2</h1>
-    <p class="post-meta">Feb 15, 2016</p>
+    <h1 class="post-title">Verifying database schema in console</h1>
+    <p class="post-meta">Jun 29, 2016 • Krzysztof Maicher • <i>ruby rails migrations psql PostgreSQL MySQL </i></p>
   </header>
 
   <article class="post-content">
-    <p>You’ll find this post in your <code class="highlighter-rouge">_posts</code> directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run <code class="highlighter-rouge">jekyll serve</code>, which launches a web server and auto-regenerates your site when a file is updated.</p>
+    
+<p>In Rails we have a <code class="highlighter-rouge">schema.rb</code> file, where we can check, how our database looks like.</p>
 
-<p>To add new posts, simply add a file in the <code class="highlighter-rouge">_posts</code> directory that follows the convention <code class="highlighter-rouge">YYYY-MM-DD-name-of-post.ext</code> and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.</p>
+<p>However, logging in to database console can be sometimes useful.</p>
 
-<p>Jekyll also offers powerful support for code snippets:</p>
+<p>Here are a list of needed console commands.</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">print_hi</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
-  <span class="nb">puts</span> <span class="s2">"Hi, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span>
-<span class="k">end</span>
-<span class="n">print_hi</span><span class="p">(</span><span class="s1">'Tom'</span><span class="p">)</span>
-<span class="c1">#=&gt; prints 'Hi, Tom' to STDOUT.</span></code></pre></figure>
+<h3 id="psql-and-mysql-console-commands">PSQL and MySQL console commands</h3>
 
-<p>Check out the <a href="http://jekyllrb.com">Jekyll docs</a> for more info on how to get the most out of Jekyll. File all bugs/feature requests at <a href="https://github.com/jekyll/jekyll">Jekyll’s GitHub repo</a>. If you have questions, you can ask them on <a href="https://github.com/jekyll/jekyll-help">Jekyll’s dedicated Help repository</a>.</p>
+<table>
+  <tbody>
+    <tr>
+      <td><strong>PostgreSQL</strong></td>
+      <td><strong>MySQL</strong></td>
+      <td><strong>Description</strong></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td><code class="highlighter-rouge">\list</code></td>
+      <td><code class="highlighter-rouge">show databases;</code></td>
+      <td>show database list</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\connect DBNAME</code></td>
+      <td><code class="highlighter-rouge">use DBNAME;</code></td>
+      <td>connec to to database</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\dt</code></td>
+      <td><code class="highlighter-rouge">show tables;</code></td>
+      <td>show all tables</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\d+ TABLE</code></td>
+      <td><code class="highlighter-rouge">describe TABLE;</code></td>
+      <td>show table details</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\q</code></td>
+      <td><code class="highlighter-rouge">exit;</code></td>
+      <td>exit from console</td>
+    </tr>
+  </tfoot>
+</table>
 
+<p> </p>
+
+<h3 id="how-to-log-into-database-console">How to log into database console?</h3>
+
+<p>It depends on the operation system and how the database was installed.</p>
+
+<p>In general:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><strong>PostgreSQL</strong></td>
+      <td><strong>MySQL</strong></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td><code class="highlighter-rouge">$ psql</code></td>
+      <td><code class="highlighter-rouge">$ mysql -u root -p</code></td>
+    </tr>
+  </tfoot>
+</table>
+
+<p> </p>
+
+<h3 id="when-checking-console-can-be-helpful">When checking console can be helpful?</h3>
+
+<p>Lastly I found myself experimenting in psql console, when I was setting indexes inside psql jsonb fields. I wasn’t sure, if Rails migration modified database schema how I expected, so I wanted to double check it in the console.</p>
+
+<p>Other examples can be:</p>
+
+<h4 id="to-check-differences-between-test-and-development-database">To check differences between test and development database</h4>
+
+<h4 id="to-check-results-of-custom-sql-in-migrations">To check results of custom SQL in migrations</h4>
+
+<h4 id="to-modify-foreign-keys-or-indexes-which-names-are-not-rails-default">To modify foreign keys or indexes, which names are not Rails default</h4>
 
   </article>
 
@@ -80,7 +148,7 @@
 <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'maichergithubio';
-    var disqus_identifier = '/ruby/test';
+    var disqus_identifier = '/verifying-database-schema-in-console';
 
     //Below here is identical to what Disqus supply as universal code.
     /* * * DON'T EDIT BELOW THIS LINE * * */
@@ -146,7 +214,7 @@
       </div>
 
       <div class="footer-col  footer-col-3">
-        <p class="text">Ruby and JavaScript developer</p>
+        <p class="text"></p>
       </div>
     </div>
 
