@@ -5,8 +5,8 @@
     <description></description>
     <link>http://maicher.github.io/</link>
     <atom:link href="http://maicher.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 13 Jul 2016 17:25:11 +0200</pubDate>
-    <lastBuildDate>Wed, 13 Jul 2016 17:25:11 +0200</lastBuildDate>
+    <pubDate>Thu, 14 Jul 2016 11:45:13 +0200</pubDate>
+    <lastBuildDate>Thu, 14 Jul 2016 11:45:13 +0200</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
@@ -50,6 +50,54 @@ I mean to keep the code decoupled, write tests, pay attention to data integrity 
 &lt;p&gt;In future posts I will try to show some code snippets.&lt;/p&gt;
 
 &lt;p&gt;Here are some screens of the finished app.&lt;/p&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;a target=&quot;_blank&quot; href=&quot;/assets/gt_dashboard.jpg&quot;&gt;&lt;img style=&quot;max-width:350px&quot; src=&quot;/assets/min/gt_dashboard.jpg&quot; alt=&quot;Bar charts showing gas and electricity cost for each address in selected date range&quot; /&gt;&lt;/a&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Bar charts showing gas and electricity cost for each address in selected date range&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;a target=&quot;_blank&quot; href=&quot;/assets/gt_charts_days.jpg&quot;&gt;&lt;img style=&quot;max-width:350px&quot; src=&quot;/assets/min/gt_charts_days.jpg&quot; alt=&quot;Line charts showing daily electricity consumption for selected addresses and date range&quot; /&gt;&lt;/a&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Line charts showing daily electricity consumption for selected addresses and date range&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;a target=&quot;_blank&quot; href=&quot;/assets/gt_charts2_hours.jpg&quot;&gt;&lt;img style=&quot;max-width:350px&quot; src=&quot;/assets/min/gt_charts2_hours.jpg&quot; alt=&quot;Line charts showing hourly electricity consumption for selected addresses and one day&quot; /&gt;&lt;/a&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Line charts showing hourly electricity consumption for selected addresses and one day&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;a target=&quot;_blank&quot; href=&quot;/assets/gt_meters_index.jpg&quot;&gt;&lt;img style=&quot;max-width:350px&quot; src=&quot;/assets/min/gt_meters_index.jpg&quot; alt=&quot;Meters table&quot; /&gt;&lt;/a&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Meters table&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;a target=&quot;_blank&quot; href=&quot;/assets/gt_address_index.jpg&quot;&gt;&lt;img style=&quot;max-width:350px&quot; src=&quot;/assets/min/gt_address_index.jpg&quot; alt=&quot;Addresses table&quot; /&gt;&lt;/a&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Addresses table&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;a target=&quot;_blank&quot; href=&quot;/assets/gt_address_edit.jpg&quot;&gt;&lt;img style=&quot;max-width:350px&quot; src=&quot;/assets/min/gt_address_edit.jpg&quot; alt=&quot;Address edit form&quot; /&gt;&lt;/a&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Address edit form&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;a target=&quot;_blank&quot; href=&quot;/assets/gt_login.jpg&quot;&gt;&lt;img style=&quot;max-width:350px&quot; src=&quot;/assets/min/gt_login.jpg&quot; alt=&quot;Admin login form&quot; /&gt;&lt;/a&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Admin login form&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;a target=&quot;_blank&quot; href=&quot;/assets/gt_stats.jpg&quot;&gt;&lt;img style=&quot;max-width:350px&quot; src=&quot;/assets/min/gt_stats.jpg&quot; alt=&quot;Statistics&quot; /&gt;&lt;/a&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Statistics&lt;/caption&gt;
+&lt;/div&gt;
 </description>
         <pubDate>Tue, 12 Jul 2016 11:11:04 +0200</pubDate>
         <link>http://maicher.github.io/freelance-ruby-or-rails-application-development.html</link>

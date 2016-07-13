@@ -46,3 +46,12 @@ Keeping the code quality high and a [craftsmanship approach](http://thecleancode
 In future posts I will try to show some code snippets.
 
 Here are some screens of the finished app.
+
+{% include image.html url="gt_dashboard.jpg" description="Bar charts showing gas and electricity cost for each address in selected date range" %}
+{% include image.html url="gt_charts_days.jpg" description="Line charts showing daily electricity consumption for selected addresses and date range" %}
+{% include image.html url="gt_charts2_hours.jpg" description="Line charts showing hourly electricity consumption for selected addresses and one day" %}
+{% include image.html url="gt_meters_index.jpg" description="Meters table" %}
+{% include image.html url="gt_address_index.jpg" description="Addresses table" %}
+{% include image.html url="gt_address_edit.jpg" description="Address edit form" %}
+{% include image.html url="gt_login.jpg" description="Admin login form" %}
+{% include image.html url="gt_stats.jpg" description="Statistics" %}
