@@ -1,19 +1,17 @@
-# Site settings
+gems: [jekyll-paginate]
+
 title: Krzysztof Maicher
 email: krzysztof.maicher@gmail.com
 description: ''
 baseurl: ''
 url: "http://maicher.github.io"
+permalink: none
+markdown: kramdown
+paginate_path: "page:num"
+paginate: 10
+
+# social media
 linkedin_username: maicher
 twitter_username: kmaicher
 github_username:  maicher
 stackoverflow_username: 'users/2933305/maicher'
-permalink: none
-paginate: 10
-
-# Build settings
-markdown: kramdown
-
-gems: [jekyll-paginate]
-paginate: 5
-paginate_path: "page:num"

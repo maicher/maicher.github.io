@@ -5,9 +5,74 @@
     <description></description>
     <link>http://maicher.github.io/</link>
     <atom:link href="http://maicher.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 01 Jul 2016 18:40:27 +0200</pubDate>
-    <lastBuildDate>Fri, 01 Jul 2016 18:40:27 +0200</lastBuildDate>
+    <pubDate>Wed, 13 Jul 2016 17:25:11 +0200</pubDate>
+    <lastBuildDate>Wed, 13 Jul 2016 17:25:11 +0200</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Freelance Ruby on Rails application development</title>
+        <description>&lt;h3 id=&quot;introduction&quot;&gt;Introduction&lt;/h3&gt;
+
+&lt;p&gt;I took a few days off from my regular work to create an application for an employment agency located in Holland. I would like to present here, how I’ve approached this task. I invite you to read!&lt;/p&gt;
+
+&lt;h3 id=&quot;background&quot;&gt;Background&lt;/h3&gt;
+
+&lt;p&gt;The client was an employment agency, that organizes work for people in agricultural sector. They also provide accommodation for their employees during the time of their employment. The client wanted to be able to monitor gas and electricity consumption in those places.
+They already had meters installed at those places. These meter were performing &lt;strong&gt;readings&lt;/strong&gt; every few minutes and collecting them as &lt;strong&gt;files on FTP server&lt;/strong&gt;.
+It was hard for the client to view and manage these reading, so the client was looking for a solution, that would view all these data in a more friendly form, like &lt;strong&gt;tables and charts&lt;/strong&gt;.
+They also wanted to group these data by addresses, perform some comparisons, see daily and hourly usage in selected date ranges and have costs per person automatically calculated.
+They contacted me and asked to propose a solution.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-solution&quot;&gt;The solution&lt;/h3&gt;
+
+&lt;p&gt;Currently, I specialize in building web application using Ruby on Rails and it seemed like a &lt;strong&gt;Ruby on Rails web application&lt;/strong&gt; could satisfy client’s requirements.
+I proposed following solution, consisting of three parts:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;An admin panel with classic CRUD for managing addresses and settings (Ruby on Rails, PostgreSQL).&lt;/li&gt;
+  &lt;li&gt;A script, acquiring data from ftp server (Ruby, CRON).&lt;/li&gt;
+  &lt;li&gt;Minimalistic frontend with a nice tables and charts (HTML/CSS, Bootstrap3, JavaScript with some AngularJS inserts).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I contacted the client to discuss each of above part once again. I wanted to check, if I understood their requirements.
+We agreed on &lt;a href=&quot;http://c2.com/cgi/wiki?TimeAndMaterialContract&quot;&gt;time &amp;amp; material&lt;/a&gt; &lt;a href=&quot;https://blog.lelonek.me/how-to-charge-our-clients-ade8b6a53102#.tr023ghm4&quot;&gt;payment model&lt;/a&gt; and I presented hourly estimates for each of above part, to get them a sens of costs.
+I declared to contact them at the end of each part to show the progress and to discuss some potential changes or misunderstandings.&lt;/p&gt;
+
+&lt;h3 id=&quot;work-process&quot;&gt;Work process&lt;/h3&gt;
+
+&lt;p&gt;For my own convenience, I decided to keep the code quality high.
+I mean to keep the code decoupled, write tests, pay attention to data integrity (validations, foreign keys, unique indexes), handle edge cases, follow the unofficial Ruby style guide and use Rubocop to check it.&lt;/p&gt;
+
+&lt;p&gt;Keeping the code quality high and a &lt;a href=&quot;http://thecleancoder.blogspot.com/2010/09/hacker-novice-artist-and-craftsman.html&quot;&gt;craftsmanship approach&lt;/a&gt; helped me go through development process efficiently.&lt;/p&gt;
+
+&lt;h3 id=&quot;results&quot;&gt;Results&lt;/h3&gt;
+
+&lt;p&gt;In future posts I will try to show some code snippets.&lt;/p&gt;
+
+&lt;p&gt;Here are some screens of the finished app.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 12 Jul 2016 11:11:04 +0200</pubDate>
+        <link>http://maicher.github.io/freelance-ruby-or-rails-application-development.html</link>
+        <guid isPermaLink="true">http://maicher.github.io/freelance-ruby-or-rails-application-development.html</guid>
+        
+        <category>ruby</category>
+        
+        <category>rails</category>
+        
+        <category>freelance</category>
+        
+        <category>angular</category>
+        
+        <category>angularjs</category>
+        
+        <category>application</category>
+        
+        <category>web application</category>
+        
+        <category>software development</category>
+        
+        
+      </item>
     
       <item>
         <title>Verifying database schema in console</title>

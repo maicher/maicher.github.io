@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Freelance Ruby on Rails application development</title>
+  <meta name="description" content="Introduction">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://maicher.github.io/freelance-ruby-or-rails-application-development.html">
+  <link rel="alternate" type="application/rss+xml" title="Krzysztof Maicher" href="http://maicher.github.io/feed.xml" />
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/"><img src="http://0.gravatar.com/avatar/223ba397b1fef4a7bec7bfc59ca74f11"/> Krzysztof Maicher</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Freelance Ruby on Rails application development</h1>
+    <p class="post-meta">Jul 12, 2016 • Krzysztof Maicher • <i>ruby rails freelance angular angularjs application web application software development </i></p>
+  </header>
+
+  <article class="post-content">
+    <h3 id="introduction">Introduction</h3>
+
+<p>I took a few days off from my regular work to create an application for an employment agency located in Holland. I would like to present here, how I’ve approached this task. I invite you to read!</p>
+
+<h3 id="background">Background</h3>
+
+<p>The client was an employment agency, that organizes work for people in agricultural sector. They also provide accommodation for their employees during the time of their employment. The client wanted to be able to monitor gas and electricity consumption in those places.
+They already had meters installed at those places. These meter were performing <strong>readings</strong> every few minutes and collecting them as <strong>files on FTP server</strong>.
+It was hard for the client to view and manage these reading, so the client was looking for a solution, that would view all these data in a more friendly form, like <strong>tables and charts</strong>.
+They also wanted to group these data by addresses, perform some comparisons, see daily and hourly usage in selected date ranges and have costs per person automatically calculated.
+They contacted me and asked to propose a solution.</p>
+
+<h3 id="the-solution">The solution</h3>
+
+<p>Currently, I specialize in building web application using Ruby on Rails and it seemed like a <strong>Ruby on Rails web application</strong> could satisfy client’s requirements.
+I proposed following solution, consisting of three parts:</p>
+
+<ul>
+  <li>An admin panel with classic CRUD for managing addresses and settings (Ruby on Rails, PostgreSQL).</li>
+  <li>A script, acquiring data from ftp server (Ruby, CRON).</li>
+  <li>Minimalistic frontend with a nice tables and charts (HTML/CSS, Bootstrap3, JavaScript with some AngularJS inserts).</li>
+</ul>
+
+<p>I contacted the client to discuss each of above part once again. I wanted to check, if I understood their requirements.
+We agreed on <a href="http://c2.com/cgi/wiki?TimeAndMaterialContract">time &amp; material</a> <a href="https://blog.lelonek.me/how-to-charge-our-clients-ade8b6a53102#.tr023ghm4">payment model</a> and I presented hourly estimates for each of above part, to get them a sens of costs.
+I declared to contact them at the end of each part to show the progress and to discuss some potential changes or misunderstandings.</p>
+
+<h3 id="work-process">Work process</h3>
+
+<p>For my own convenience, I decided to keep the code quality high.
+I mean to keep the code decoupled, write tests, pay attention to data integrity (validations, foreign keys, unique indexes), handle edge cases, follow the unofficial Ruby style guide and use Rubocop to check it.</p>
+
+<p>Keeping the code quality high and a <a href="http://thecleancoder.blogspot.com/2010/09/hacker-novice-artist-and-craftsman.html">craftsmanship approach</a> helped me go through development process efficiently.</p>
+
+<h3 id="results">Results</h3>
+
+<p>In future posts I will try to show some code snippets.</p>
+
+<p>Here are some screens of the finished app.</p>
+
+  </article>
+
+  
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'maichergithubio';
+    var disqus_identifier = '/freelance-ruby-or-rails-application-development';
+
+    //Below here is identical to what Disqus supply as universal code.
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Krzysztof Maicher</li>
+          <li><a href="mailto:krzysztof.maicher@gmail.com">krzysztof.maicher@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+            
+            <li>
+                <a target="_blank" href="https://github.com/maicher">
+                    <i class="fa fa-github"></i> Github
+                </a>
+            </li>
+            
+            
+            <li>
+                <a target="_blank" href="https://twitter.com/kmaicher">
+                    <i class="fa fa-twitter"></i> Twitter
+                </a>
+            </li>
+            
+            
+            <li>
+                <a target="_blank" href="https://pl.linkedin.com/in/maicher">
+                    <i class="fa fa-linkedin"></i> Linkedin
+                </a>
+            </li>
+            
+            
+            <li>
+                <a target="_blank" href="https://stackoverflow.com/users/2933305/maicher">
+                    <i class="fa fa-stack-overflow"></i> Stackoverflow
+                </a>
+            </li>
+            
+
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text"></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
