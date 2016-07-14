@@ -5,6 +5,7 @@ email: krzysztof.maicher@gmail.com
 description: ''
 baseurl: ''
 url: "http://maicher.github.io"
+google_analytics: 'UA-43848966-7'
 permalink: none
 markdown: kramdown
 paginate_path: "page:num"
