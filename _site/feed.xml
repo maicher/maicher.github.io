@@ -18,7 +18,7 @@
 &lt;h3 id=&quot;background&quot;&gt;Background&lt;/h3&gt;
 
 &lt;p&gt;The client was an employment agency, that organizes work for people in agricultural sector. They also provide accommodation for their employees during the time of their employment. The client wanted to be able to monitor gas and electricity consumption in those places.
-They already had meters installed at those places. These meter were performing &lt;strong&gt;readings&lt;/strong&gt; every few minutes and collecting them as &lt;strong&gt;files on FTP server&lt;/strong&gt;.
+They already had meters installed (a kind of &lt;a href=&quot;https://en.wikipedia.org/wiki/Smart_meter&quot;&gt;Smart Meters&lt;/a&gt;) at those places. These meter were performing &lt;strong&gt;readings&lt;/strong&gt; every few minutes and collecting them as &lt;strong&gt;files on FTP server&lt;/strong&gt;.
 It was hard for the client to view and manage these reading, so the client was looking for a solution, that would view all these data in a more friendly form, like &lt;strong&gt;tables and charts&lt;/strong&gt;.
 They also wanted to group these data by addresses, perform some comparisons, see daily and hourly usage in selected date ranges and have costs per person automatically calculated.
 They contacted me and asked to propose a solution.&lt;/p&gt;

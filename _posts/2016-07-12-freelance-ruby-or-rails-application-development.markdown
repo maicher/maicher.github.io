@@ -16,7 +16,7 @@ I took a few days off from my regular work to create an application for an emplo
 ### Background
 
 The client was an employment agency, that organizes work for people in agricultural sector. They also provide accommodation for their employees during the time of their employment. The client wanted to be able to monitor gas and electricity consumption in those places.
-They already had meters installed at those places. These meter were performing __readings__ every few minutes and collecting them as __files on FTP server__.
+They already had meters installed (a kind of [Smart Meters](https://en.wikipedia.org/wiki/Smart_meter)) at those places. These meter were performing __readings__ every few minutes and collecting them as __files on FTP server__.
 It was hard for the client to view and manage these reading, so the client was looking for a solution, that would view all these data in a more friendly form, like __tables and charts__.
 They also wanted to group these data by addresses, perform some comparisons, see daily and hourly usage in selected date ranges and have costs per person automatically calculated.
 They contacted me and asked to propose a solution.
