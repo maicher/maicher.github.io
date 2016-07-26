@@ -16,3 +16,14 @@ linkedin_username: maicher
 twitter_username: kmaicher
 github_username:  maicher
 stackoverflow_username: 'users/2933305/maicher'
+
+kramdown:
+  input:          GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
