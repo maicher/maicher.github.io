@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>My approach to a database design process for Rails application</title>
+  <meta name="description" content="Introduction">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://maicher.github.io/my-approach-to-a-database-design-process-for-rails-application.html">
+  <link rel="alternate" type="application/rss+xml" title="Krzysztof Maicher" href="http://maicher.github.io/feed.xml" />
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-43848966-7', 'auto');
+    ga('send', 'pageview');
+  </script>
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/"><img src="http://0.gravatar.com/avatar/223ba397b1fef4a7bec7bfc59ca74f11"/> Krzysztof Maicher</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">My approach to a database design process for Rails application</h1>
+    <p class="post-meta">Aug 3, 2016 • Krzysztof Maicher • <i>Ruby Rails database PostgreSQL </i></p>
+  </header>
+
+  <article class="post-content">
+    <h3 id="introduction">Introduction</h3>
+
+<p>Some time ago, I’ve created a Ruby on Rails application, which purpose was to present data (electric and gas meter readings) by charts and tables.
+The application was acquiring that data from FTP.</p>
+
+<p>You can read more about that app <a href="/freelance-ruby-or-rails-application-development">here</a>.</p>
+
+<p>In this article I’d like to describe my thought process behind designing a peace of database for that application.
+The part of database, that I want to show is simple, only 3 tables.
+My goal is to point out some implementation details, thanks to which I’m 100% sure to say, that <strong>application, based on that database design will never loose it’s <a href="https://en.wikipedia.org/wiki/Data_integrity">data integrity</a></strong>.
+I invite you to read!</p>
+
+<h3 id="analyze-data">Analyze data</h3>
+
+<p>Data, that were stored on FTP by meters, had following characteristics:</p>
+
+<ul>
+  <li>there are around 40 meters, each identified by its unique 18-digit number</li>
+  <li>each meter puts its measurements on ftp server as a csv file</li>
+  <li>each file has about 50 lines</li>
+  <li>one line represent one reading (two values, timestamp and a meter number)</li>
+  <li>around 40 new files a day (can be more in future)</li>
+  <li>that gives around 2k new readings every day</li>
+</ul>
+
+<p>Over a year, the data would grow to <em>2k x 365</em>, that is around <em>0.7M</em> records each year.
+That is not that much and a properly designed <em>PostgreSQL</em> database should handle that amount of data without any performance problems for years.
+I wanted to store that data in a relational database, that would allow me to easily access it in other part of application, to present it as charts or tables.</p>
+
+<h3 id="database-design-upfront">Database design upfront</h3>
+
+<p>I decided, that the application will interact with database by ActiveRecord. I like ActiveRecord, because of its ease of use.
+However, when it comes to creating new ActiveRecord models, my approach may be different from other Rails developers.
+I’ve seen, that sometimes Rails developers jump into generating ActiveRecord models (using <code class="highlighter-rouge">rails generate model ...</code>) without really paying attention to how the resulting database will look like.</p>
+
+<p>I like to come up with a <strong>database design upfront</strong> (in mind, on paper or in some tool) and after that, I start creating ActiveRecord models to satisfy the database design.
+In other words I design database at first, and then build an <strong>ActiveRecord models layer on top of it</strong>.</p>
+
+<p>In this case I came up with following database design.</p>
+
+<p><img src="/assets/gt_readings_db.png" alt="Database schema" /></p>
+
+<p>That design is not complex, so I made it in my head before start creating models.
+However, if more tables with more sophisticated relations would be necessary, I could draw a design on paper or in some tool (eg. SQL Power Architect) before generating models and migrations.</p>
+
+<h3 id="ftpfiles-model">FtpFiles model</h3>
+
+<p>At first I came up with <em>ftp_files</em> table. My idea of <em>ftp_files</em> table was to store a list of file names, that have already been parsed. Just a list of file names.
+It would be pointless to allow keeping there empty names, that’s why I’ve set a <a href="https://www.postgresql.org/docs/9.3/static/ddl-constraints.html#AEN2486">not-null constraint</a>.
+To ensure <em>name</em> uniqueness I could set a <a href="https://www.postgresql.org/docs/9.4/static/indexes-unique.html">unique index</a> or <a href="https://www.postgresql.org/docs/9.3/static/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS">unique constraint</a>.
+Both ensures uniqueness.
+Unique index would also improve performance on querying that table by that column, but lower insertions.
+At this moment, I did not know, whether my application needs an index on that column.
+I was sure that I need the uniqueness and was not sure if I need index.
+From my experience, in most cases, when uniqueness is needed, a index is needed as well.
+So I decided to implemented a unique index there.</p>
+
+<p>Summarizing <em>ftp_files</em> has a name column, that has to be unique and cannot be null.</p>
+
+<p>Having that in head, I ran <code class="highlighter-rouge">rails g model FtpFile name:string</code>.</p>
+
+<p>Now, how should the generated migration be adjusted?</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre></td><td class="code"><pre><span class="k">class</span> <span class="nc">CreateFtpFiles</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
+  <span class="k">def</span> <span class="nf">change</span>
+    <span class="n">create_table</span> <span class="ss">:ftp_files</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">string</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">nil: </span><span class="kp">false</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">column</span> <span class="ss">:created_at</span><span class="p">,</span> <span class="ss">:datetime</span>
+    <span class="k">end</span>
+
+    <span class="n">add_index</span> <span class="ss">:ftp_files</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">unique: </span><span class="kp">true</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></td></tr></tbody></table>
+</div>
+</div>
+
+<h3 id="meter-model">Meter model</h3>
+
+<p>A meter is identified by it’s <em>number</em>.
+There has to be only one meter with given number, that’s why I decided to apply a not-null constraints and unique index on <em>number</em> column as well.
+Having a unique index on that column gives the assurance, that in application, every time a meter will be searched by number, there will be zero or exactly one meter found.</p>
+
+<p>Migrations:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre></td><td class="code"><pre><span class="k">class</span> <span class="nc">CreateMeters</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
+  <span class="k">def</span> <span class="nf">change</span>
+    <span class="n">create_table</span> <span class="ss">:meters</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">string</span> <span class="ss">:number</span><span class="p">,</span> <span class="ss">null: </span><span class="kp">false</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">integer</span> <span class="ss">:meter_type</span><span class="p">,</span> <span class="ss">null: </span><span class="kp">true</span>
+
+      <span class="n">t</span><span class="p">.</span><span class="nf">timestamps</span> <span class="ss">null: </span><span class="kp">false</span>
+    <span class="k">end</span>
+
+    <span class="n">add_index</span> <span class="ss">:meters</span><span class="p">,</span> <span class="ss">:number</span><span class="p">,</span> <span class="ss">unique: </span><span class="kp">true</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></td></tr></tbody></table>
+</div>
+</div>
+
+<h3 id="reading-model">Reading model</h3>
+
+<p>Reading belongs to meter. Meter has many readings.</p>
+
+<p>One reading consists of 4 values:</p>
+
+<ul>
+  <li>datetime, when it was measured,</li>
+  <li>18-digit meter number,</li>
+  <li>two reading values, each representing different tariff. First is always present, second - only sometimes.</li>
+</ul>
+
+<p>In database, I represented that as following columns: <em>timestamp</em>, <em>meter_id</em>, <em>value1</em>, <em>value2</em>. You can go back to the schema above and check it out visually.</p>
+
+<p>It is highly undesirable to double readings in database, because charts created from them would present incorrect values.
+How to prevent from saving double readings?
+In <em>PostgreSQL</em> a <strong>unique constraints</strong> or <strong>unique index</strong> can be applied to a <strong>group of columns</strong>.</p>
+
+<p>There is a complete certainty, that when application for any reason (bug, my or some other developers mistake, or even a client’s software problem) will try to insert a doubled reading to database, an exception will be raised (from database level), which is very desirable.
+I don’t want to see double readings in that database. Unique indexes guarantees it and I can rely on that.</p>
+
+<p>Migration:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre></td><td class="code"><pre><span class="k">class</span> <span class="nc">CreateReadings</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
+  <span class="k">def</span> <span class="nf">change</span>
+    <span class="n">create_table</span> <span class="ss">:readings</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">integer</span> <span class="ss">:value1</span><span class="p">,</span> <span class="ss">null: </span><span class="kp">false</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">integer</span> <span class="ss">:value2</span><span class="p">,</span> <span class="ss">null: </span><span class="kp">true</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">datetime</span> <span class="ss">:timestamp</span><span class="p">,</span> <span class="ss">null: </span><span class="kp">false</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">integer</span> <span class="ss">:meter_id</span><span class="p">,</span> <span class="ss">null: </span><span class="kp">false</span>
+    <span class="k">end</span>
+
+    <span class="n">add_foreign_key</span> <span class="ss">:readings</span><span class="p">,</span> <span class="ss">:meters</span><span class="p">,</span> <span class="ss">on_delete: :restrict</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></td></tr></tbody></table>
+</div>
+</div>
+
+<h4 id="foreign-keys">Foreign keys</h4>
+
+<p>What is seen in 10’th line in above migration is a <a href="https://www.postgresql.org/docs/8.1/static/tutorial-fk.html">foreign key</a>.
+<em>meters</em> and <em>readings</em> tables are related.
+A foreign key is a mechanism, that keeps so called <em>referential integrity</em> of that two tables.
+It prevents inserting reading related to non-existent meter and prevents from deleting meter, that has related readings.
+In other words, a <strong>foreign key prevents the occurrence of <a href="http://www.dhdursoassociates.com/database-glossary-3.html#orphan">orphaned records</a></strong> in readings table.</p>
+
+<h3 id="activerecord-validations">ActiveRecord validations</h3>
+
+<p>Aren’t what ActiveRecord validations are made for? All above mechanisms could be implemented in ActiveRecord models though.
+I like to use ActiveRecord validations, since they are helpful in generating nice error messages, but there are so many ways of going around them, that they cannot be rely on.</p>
+
+<p><strong>ActiveRecord validations doesn’t guarantee application’s data integrity</strong>.</p>
+
+<ul>
+  <li>Because they can be omitted by using following methods:</li>
+</ul>
+
+<p><code class="highlighter-rouge">#save(validate: false)</code>, <code class="highlighter-rouge">.update_attribute</code>, <code class="highlighter-rouge">.delete</code>, <code class="highlighter-rouge">.delete_all</code>, <code class="highlighter-rouge">.update_all</code></p>
+
+<p>Since above methods are available in whole application, it’s crazy to assume, that nobody ever will use them!</p>
+
+<ul>
+  <li>Because developer can write to database tables by using raw SQL queries, or even log into psql console to run some updates or inserts.</li>
+  <li>Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read <em>Concurrency and integrity</em> section in <a href="http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of">documentation</a>)</li>
+</ul>
+
+<h3 id="data-integrity">Data integrity</h3>
+
+<p>Summarizing, if you want to prevent an application from loosing it’s data integrity, you have to keep <strong>security on a database layer</strong>. I other words, you have to use database mechanisms to prevent loosing data integrity.
+ActiveRecord validations can not be rely on.
+Using ActiveRecord models speeds up the development process, but using them without a solidly designed database can lead to frustrations and to lots of maintenance work, when data will start loosing its integrity in production.</p>
+
+<p>When you aim for a solid database design, learn about foreign keys and start using them.
+Start using uniqueness validations not only in ActiveRecord models, but at a database layer as well (including unique indexes on groups or inside json fields).
+Use not-null constraints if column can’t be blank and specify a default value.</p>
+
+<p>In my case, in application, that I described here, I can be sure (unless nobody will modify the database schema), that:</p>
+
+<ul>
+  <li>Readings and meters will not be doubled.</li>
+  <li>There will be no readings without a value or timestamp.</li>
+  <li>There will be no orphaned records on meters-readings relation.</li>
+</ul>
+
+<p>Furthermore, application can download the data concurrently and when race conditions will occur, they can be handle, because database will inform about that by raising errors.</p>
+
+<p>Having that, the client can rely on the data in that database. Meter readings can be kept there for years, without fear of loosing their consistency.</p>
+
+  </article>
+
+  
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'maichergithubio';
+    var disqus_identifier = '/my-approach-to-a-database-design-process-for-rails-application';
+
+    //Below here is identical to what Disqus supply as universal code.
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Krzysztof Maicher</li>
+          <li><a href="mailto:krzysztof.maicher@gmail.com">krzysztof.maicher@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+            
+            <li>
+                <a target="_blank" href="https://github.com/maicher">
+                    <i class="fa fa-github"></i> Github
+                </a>
+            </li>
+            
+            
+            <li>
+                <a target="_blank" href="https://twitter.com/kmaicher">
+                    <i class="fa fa-twitter"></i> Twitter
+                </a>
+            </li>
+            
+            
+            <li>
+                <a target="_blank" href="https://pl.linkedin.com/in/maicher">
+                    <i class="fa fa-linkedin"></i> Linkedin
+                </a>
+            </li>
+            
+            
+            <li>
+                <a target="_blank" href="https://stackoverflow.com/users/2933305/maicher">
+                    <i class="fa fa-stack-overflow"></i> Stackoverflow
+                </a>
+            </li>
+            
+
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text"></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

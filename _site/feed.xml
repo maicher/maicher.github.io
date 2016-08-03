@@ -5,12 +5,12 @@
     <description></description>
     <link>http://maicher.github.io/</link>
     <atom:link href="http://maicher.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 30 Jul 2016 12:19:02 +0200</pubDate>
-    <lastBuildDate>Sat, 30 Jul 2016 12:19:02 +0200</lastBuildDate>
+    <pubDate>Thu, 03 Aug 2016 20:27:46 +0200</pubDate>
+    <lastBuildDate>Thu, 03 Aug 2016 20:27:46 +0200</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
-        <title>Implementation of FTP data downloading in Ruby. Part 1: designing database</title>
+        <title>My approach to a database design process for Rails application</title>
         <description>&lt;h3 id=&quot;introduction&quot;&gt;Introduction&lt;/h3&gt;
 
 &lt;p&gt;Some time ago, I’ve created a Ruby on Rails application, which purpose was to present data (electric and gas meter readings) by charts and tables.
@@ -18,106 +18,223 @@ The application was acquiring that data from FTP.&lt;/p&gt;
 
 &lt;p&gt;You can read more about that app &lt;a href=&quot;/freelance-ruby-or-rails-application-development&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;In these article I would like to present, how I’ve approached the database designing process.&lt;/p&gt;
+&lt;p&gt;In this article I’d like to describe my thought process behind designing a peace of database for that application.
+The part of database, that I want to show is simple, only 3 tables.
+My goal is to point out some implementation details, thanks to which I’m 100% sure to say, that &lt;strong&gt;application, based on that database design will never loose it’s &lt;a href=&quot;https://en.wikipedia.org/wiki/Data_integrity&quot;&gt;data integrity&lt;/a&gt;&lt;/strong&gt;.
+I invite you to read!&lt;/p&gt;
 
-&lt;h3 id=&quot;analyzing-the-data&quot;&gt;Analyzing the data&lt;/h3&gt;
+&lt;h3 id=&quot;analyze-data&quot;&gt;Analyze data&lt;/h3&gt;
 
-&lt;p&gt;Data, that were stored on FTP by meters had following characteristics:&lt;/p&gt;
+&lt;p&gt;Data, that were stored on FTP by meters, had following characteristics:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;meter readings in csv files on FTP server&lt;/li&gt;
-  &lt;li&gt;about 50 lines in each file&lt;/li&gt;
+  &lt;li&gt;there are around 40 meters, each identified by its unique 18-digit number&lt;/li&gt;
+  &lt;li&gt;each meter puts its measurements on ftp server as a csv file&lt;/li&gt;
+  &lt;li&gt;each file has about 50 lines&lt;/li&gt;
   &lt;li&gt;one line represent one reading (two values, timestamp and a meter number)&lt;/li&gt;
-  &lt;li&gt;around 30 new files a day (can be more in future)&lt;/li&gt;
-  &lt;li&gt;that gives around 1.5k new readings every day&lt;/li&gt;
+  &lt;li&gt;around 40 new files a day (can be more in future)&lt;/li&gt;
+  &lt;li&gt;that gives around 2k new readings every day&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Over a year, the data would grow to &lt;em&gt;1.5k x 365&lt;/em&gt;, that is around &lt;em&gt;0.5M&lt;/em&gt; records each year.
-That is not that much and a properly designed PostgreSQL database can handle that amount of data without any problems.
-My idea was to store that data in a relational database, that would allow me to easily access it later to view it as charts or tables.&lt;/p&gt;
+&lt;p&gt;Over a year, the data would grow to &lt;em&gt;2k x 365&lt;/em&gt;, that is around &lt;em&gt;0.7M&lt;/em&gt; records each year.
+That is not that much and a properly designed &lt;em&gt;PostgreSQL&lt;/em&gt; database should handle that amount of data without any performance problems for years.
+I wanted to store that data in a relational database, that would allow me to easily access it in other part of application, to present it as charts or tables.&lt;/p&gt;
 
-&lt;h3 id=&quot;designing-database&quot;&gt;Designing database&lt;/h3&gt;
+&lt;h3 id=&quot;database-design-upfront&quot;&gt;Database design upfront&lt;/h3&gt;
 
-&lt;p&gt;I decided, that the application will interact with database by ActiveRecord models. I like to use ActiveRecord, because of its ease of use.
+&lt;p&gt;I decided, that the application will interact with database by ActiveRecord. I like ActiveRecord, because of its ease of use.
 However, when it comes to creating new ActiveRecord models, my approach may be different from other Rails developers.
-What I seen, that sometimes Rails developers jump into generating models (using &lt;code class=&quot;highlighter-rouge&quot;&gt;rails generate model ...&lt;/code&gt;) without any thoughts about how the database should look like.
-I like to come up with a &lt;strong&gt;database design upfront&lt;/strong&gt; (in mind, on paper or in some tool) and after that, I start generating ActiveRecord models and adjust settings in migrations to satisfy the database design.
-In other words I design database at first, and then I build an &lt;strong&gt;ActiveRecord models layer on top of it&lt;/strong&gt;.&lt;/p&gt;
+I’ve seen, that sometimes Rails developers jump into generating ActiveRecord models (using &lt;code class=&quot;highlighter-rouge&quot;&gt;rails generate model ...&lt;/code&gt;) without really paying attention to how the resulting database will look like.&lt;/p&gt;
 
-&lt;p&gt;In this case I came up with following database schema.&lt;/p&gt;
+&lt;p&gt;I like to come up with a &lt;strong&gt;database design upfront&lt;/strong&gt; (in mind, on paper or in some tool) and after that, I start creating ActiveRecord models to satisfy the database design.
+In other words I design database at first, and then build an &lt;strong&gt;ActiveRecord models layer on top of it&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;In this case I came up with following database design.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/assets/gt_readings_db.png&quot; alt=&quot;Database schema&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;I generated that schema using SQL Power Architect tool afterwards. It is not complex, so I could make that design in my head before start generating models.
-However, if project needs more tables with more sophisticated relations between them, I could draw that design on paper or in that tool before generating models and migrations.&lt;/p&gt;
+&lt;p&gt;That design is not complex, so I made it in my head before start creating models.
+However, if more tables with more sophisticated relations would be necessary, I could draw a design on paper or in some tool (eg. SQL Power Architect) before generating models and migrations.&lt;/p&gt;
 
-&lt;p&gt;Btw. during my career I found out that presenting this kind of schemas in projects’ documentations helps other developers to understand projects’ database design.&lt;/p&gt;
+&lt;h3 id=&quot;ftpfiles-model&quot;&gt;FtpFiles model&lt;/h3&gt;
 
-&lt;p&gt;Because the tables was generated from Rails, it can be assumed, that they follow all Rails conventions.&lt;/p&gt;
+&lt;p&gt;At first I came up with &lt;em&gt;ftp_files&lt;/em&gt; table. My idea of &lt;em&gt;ftp_files&lt;/em&gt; table was to store a list of file names, that have already been parsed. Just a list of file names.
+It would be pointless to allow keeping there empty names, that’s why I’ve set a &lt;a href=&quot;https://www.postgresql.org/docs/9.3/static/ddl-constraints.html#AEN2486&quot;&gt;not-null constraint&lt;/a&gt;.
+To ensure &lt;em&gt;name&lt;/em&gt; uniqueness I could set a &lt;a href=&quot;https://www.postgresql.org/docs/9.4/static/indexes-unique.html&quot;&gt;unique index&lt;/a&gt; or &lt;a href=&quot;https://www.postgresql.org/docs/9.3/static/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS&quot;&gt;unique constraint&lt;/a&gt;.
+Both ensures uniqueness.
+Unique index would also improve performance on querying that table by that column, but lower insertions.
+At this moment, I did not know, whether my application needs an index on that column.
+I was sure that I need the uniqueness and was not sure if I need index.
+From my experience, in most cases, when uniqueness is needed, a index is needed as well.
+So I decided to implemented a unique index there.&lt;/p&gt;
 
-&lt;p&gt;How to read that schema?&lt;/p&gt;
+&lt;p&gt;Summarizing &lt;em&gt;ftp_files&lt;/em&gt; has a name column, that has to be unique and cannot be null.&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;There are 3 tables: &lt;code class=&quot;highlighter-rouge&quot;&gt;meters&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;readings&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;ftp_files&lt;/code&gt; (in application they are represented by models: Meter, Reading, FtpFile).&lt;/li&gt;
-  &lt;li&gt;Each table has a &lt;code class=&quot;highlighter-rouge&quot;&gt;id&lt;/code&gt; row, which is a Primary Key (&lt;code class=&quot;highlighter-rouge&quot;&gt;[PK]&lt;/code&gt;).&lt;/li&gt;
-  &lt;li&gt;There are various column types: &lt;code class=&quot;highlighter-rouge&quot;&gt;INTEGER&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;VARCHAR&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;TIMESTAMP&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;Some columns have a non-null constraint (&lt;code class=&quot;highlighter-rouge&quot;&gt;[AK]&lt;/code&gt;).&lt;/li&gt;
-  &lt;li&gt;A &lt;a href=&quot;https://www.postgresql.org/docs/8.1/static/tutorial-fk.html&quot;&gt;foreign key&lt;/a&gt; is set between meters and readings tables (&lt;code class=&quot;highlighter-rouge&quot;&gt;[FK]&lt;/code&gt;).&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;Having that in head, I ran &lt;code class=&quot;highlighter-rouge&quot;&gt;rails g model FtpFile name:string&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;I’d like to ask you, after seeing that, can you create Rails migrations, the result of which would be above schema?&lt;/p&gt;
+&lt;p&gt;Now, how should the generated migration be adjusted?&lt;/p&gt;
 
-&lt;h3 id=&quot;unique-indexes&quot;&gt;Unique indexes&lt;/h3&gt;
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CreateFtpFiles&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ActiveRecord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Migration&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;change&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;create_table&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:ftp_files&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;nil: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;false&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;column&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:created_at&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:datetime&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 
-&lt;p&gt;What cannot be seen in schema presented above is unique indexes.
-I’d like describe them here.&lt;/p&gt;
+    &lt;span class=&quot;n&quot;&gt;add_index&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:ftp_files&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;unique: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
 
-&lt;p&gt;My idea of &lt;em&gt;ftp_files&lt;/em&gt; table was to store a list of file names, that have already been parsed.
-It’s pointless to allow keeping there doubled names. That is why I set a &lt;a href=&quot;https://www.postgresql.org/docs/9.4/static/indexes-unique.html&quot;&gt;unique index&lt;/a&gt; on the &lt;em&gt;name&lt;/em&gt; column.&lt;/p&gt;
+&lt;h3 id=&quot;meter-model&quot;&gt;Meter model&lt;/h3&gt;
 
-&lt;p&gt;A &lt;em&gt;Meter&lt;/em&gt; is identified by it’s &lt;em&gt;number&lt;/em&gt;.
-There has to be only one meter with given number, that’s why I decided to apply unique index on it as well.
+&lt;p&gt;A meter is identified by it’s &lt;em&gt;number&lt;/em&gt;.
+There has to be only one meter with given number, that’s why I decided to apply a not-null constraints and unique index on &lt;em&gt;number&lt;/em&gt; column as well.
 Having a unique index on that column gives the assurance, that in application, every time a meter will be searched by number, there will be zero or exactly one meter found.&lt;/p&gt;
 
-&lt;p&gt;As it goes tor &lt;em&gt;readings&lt;/em&gt;, it is highly undesirable to double readings in database, because charts created from them would present incorrect values.
-One reading consists of 4 data. A &lt;em&gt;timestamp&lt;/em&gt;, &lt;em&gt;meter_id&lt;/em&gt;, &lt;em&gt;value1&lt;/em&gt;, &lt;em&gt;value2&lt;/em&gt;. How to prevent from saving double readings?
-In PostgreSQL a unique index can also be applied to group of columns.
-There is a complete certainty, that when application for any reason (bug, my or some other developers mistake, or even a client’s software bug) will try to save a double reading, an exception will be raised (from database level), which is very desirable.
+&lt;p&gt;Migrations:&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CreateMeters&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ActiveRecord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Migration&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;change&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;create_table&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:meters&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:number&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;null: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;false&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:meter_type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;null: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt;
+
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;timestamps&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;null: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;false&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;add_index&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:meters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:number&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;unique: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;reading-model&quot;&gt;Reading model&lt;/h3&gt;
+
+&lt;p&gt;Reading belongs to meter. Meter has many readings.&lt;/p&gt;
+
+&lt;p&gt;One reading consists of 4 values:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;datetime, when it was measured,&lt;/li&gt;
+  &lt;li&gt;18-digit meter number,&lt;/li&gt;
+  &lt;li&gt;two reading values, each representing different tariff. First is always present, second - only sometimes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In database, I represented that as following columns: &lt;em&gt;timestamp&lt;/em&gt;, &lt;em&gt;meter_id&lt;/em&gt;, &lt;em&gt;value1&lt;/em&gt;, &lt;em&gt;value2&lt;/em&gt;. You can go back to the schema above and check it out visually.&lt;/p&gt;
+
+&lt;p&gt;It is highly undesirable to double readings in database, because charts created from them would present incorrect values.
+How to prevent from saving double readings?
+In &lt;em&gt;PostgreSQL&lt;/em&gt; a &lt;strong&gt;unique constraints&lt;/strong&gt; or &lt;strong&gt;unique index&lt;/strong&gt; can be applied to a &lt;strong&gt;group of columns&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;There is a complete certainty, that when application for any reason (bug, my or some other developers mistake, or even a client’s software problem) will try to insert a doubled reading to database, an exception will be raised (from database level), which is very desirable.
 I don’t want to see double readings in that database. Unique indexes guarantees it and I can rely on that.&lt;/p&gt;
+
+&lt;p&gt;Migration:&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CreateReadings&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ActiveRecord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Migration&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;change&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;create_table&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:readings&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:value1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;null: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;false&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:value2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;null: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;datetime&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:timestamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;null: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;false&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;integer&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:meter_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;null: &lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;false&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;add_foreign_key&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:readings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:meters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;on_delete: :restrict&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h4 id=&quot;foreign-keys&quot;&gt;Foreign keys&lt;/h4&gt;
+
+&lt;p&gt;What is seen in 10’th line in above migration is a &lt;a href=&quot;https://www.postgresql.org/docs/8.1/static/tutorial-fk.html&quot;&gt;foreign key&lt;/a&gt;.
+&lt;em&gt;meters&lt;/em&gt; and &lt;em&gt;readings&lt;/em&gt; tables are related.
+A foreign key is a mechanism, that keeps so called &lt;em&gt;referential integrity&lt;/em&gt; of that two tables.
+It prevents inserting reading related to non-existent meter and prevents from deleting meter, that has related readings.
+In other words, a &lt;strong&gt;foreign key prevents the occurrence of &lt;a href=&quot;http://www.dhdursoassociates.com/database-glossary-3.html#orphan&quot;&gt;orphaned records&lt;/a&gt;&lt;/strong&gt; in readings table.&lt;/p&gt;
+
+&lt;h3 id=&quot;activerecord-validations&quot;&gt;ActiveRecord validations&lt;/h3&gt;
+
+&lt;p&gt;Aren’t what ActiveRecord validations are made for? All above mechanisms could be implemented in ActiveRecord models though.
+I like to use ActiveRecord validations, since they are helpful in generating nice error messages, but there are so many ways of going around them, that they cannot be rely on.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;ActiveRecord validations doesn’t guarantee application’s data integrity&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Because they can be omitted by using following methods:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;#save(validate: false)&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;.update_attribute&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;.delete&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;.delete_all&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;.update_all&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Since above methods are available in whole application, it’s crazy to assume, that nobody ever will use them!&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Because developer can write to database tables by using raw SQL queries, or even log into psql console to run some updates or inserts.&lt;/li&gt;
+  &lt;li&gt;Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read &lt;em&gt;Concurrency and integrity&lt;/em&gt; section in &lt;a href=&quot;http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of&quot;&gt;documentation&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h3 id=&quot;data-integrity&quot;&gt;Data integrity&lt;/h3&gt;
 
-&lt;p&gt;It is highly probable, that that peace of database will keep it own &lt;a href=&quot;https://en.wikipedia.org/wiki/Data_integrity&quot;&gt;data integrity&lt;/a&gt; regardless of what will happen in application (if of course the application will not modify the schema).&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Meters will not be doubled.&lt;/li&gt;
-  &lt;li&gt;Readings will not be doubled.&lt;/li&gt;
-  &lt;li&gt;There will be no readings without a value, timestamp or associated meter.&lt;/li&gt;
-  &lt;li&gt;There will be no &lt;a href=&quot;http://www.dhdursoassociates.com/database-glossary-3.html#orphan&quot;&gt;orphaned records&lt;/a&gt; on meters-readings associacion.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Note, that the &lt;strong&gt;security is kept on a database layer&lt;/strong&gt;. I other words, the database uses it own mechanisms to prevent loosing its own integrity.&lt;/p&gt;
-
-&lt;p&gt;That database doesn’t need ActiveRecord layer to keep data integrity, which is desirable, bacause ActiveRecord validations (even though they are very useful and helpful) &lt;strong&gt;doesn’t guarantee the application’s data integrity&lt;/strong&gt;.
-That is because ActiveRecords validations can be omitted by using following methods:&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;#save(validate: false)&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;.update_attribute&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;delete&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;.delete_all&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;.update_all&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Furthermore someone can modify database tables by raw SQL queries, or even by logging into psql console to run some updates or inserts. Finally, my own code can have bugs and for example can try to create double records.&lt;/p&gt;
-
-&lt;h3 id=&quot;summary&quot;&gt;Summary&lt;/h3&gt;
-
-&lt;p&gt;I see database as a layer, that can keep its data consistency by itself, without the use of ActiveRecord models.
-I use ActiveRecord often and I think it is a solid piece of library. It speeds up the development process, comparing to not using any ORM system at all.
-However using ActiveRecord models without a solidly designed database can lead to frustrations and to lots of maintenance work, when database will start loosing its integrity.&lt;/p&gt;
+&lt;p&gt;Summarizing, if you want to prevent an application from loosing it’s data integrity, you have to keep &lt;strong&gt;security on a database layer&lt;/strong&gt;. I other words, you have to use database mechanisms to prevent loosing data integrity.
+ActiveRecord validations can not be rely on.
+Using ActiveRecord models speeds up the development process, but using them without a solidly designed database can lead to frustrations and to lots of maintenance work, when data will start loosing its integrity in production.&lt;/p&gt;
 
 &lt;p&gt;When you aim for a solid database design, learn about foreign keys and start using them.
 Start using uniqueness validations not only in ActiveRecord models, but at a database layer as well (including unique indexes on groups or inside json fields).
-Start specifying if a column can have null value or not and if not, then specify a default value.&lt;/p&gt;
+Use not-null constraints if column can’t be blank and specify a default value.&lt;/p&gt;
+
+&lt;p&gt;In my case, in application, that I described here, I can be sure (unless nobody will modify the database schema), that:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Readings and meters will not be doubled.&lt;/li&gt;
+  &lt;li&gt;There will be no readings without a value or timestamp.&lt;/li&gt;
+  &lt;li&gt;There will be no orphaned records on meters-readings relation.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Furthermore, application can download the data concurrently and when race conditions will occur, they can be handle, because database will inform about that by raising errors.&lt;/p&gt;
+
+&lt;p&gt;Having that, the client can rely on the data in that database. Meter readings can be kept there for years, without fear of loosing their consistency.&lt;/p&gt;
 </description>
-        <pubDate>Mon, 25 Jul 2016 21:39:04 +0200</pubDate>
-        <link>http://maicher.github.io/implementation-of-ftp-data-downloading-in-ruby-designing-database.html</link>
-        <guid isPermaLink="true">http://maicher.github.io/implementation-of-ftp-data-downloading-in-ruby-designing-database.html</guid>
+        <pubDate>Wed, 03 Aug 2016 22:00:00 +0200</pubDate>
+        <link>http://maicher.github.io/my-approach-to-a-database-design-process-for-rails-application.html</link>
+        <guid isPermaLink="true">http://maicher.github.io/my-approach-to-a-database-design-process-for-rails-application.html</guid>
         
         <category>Ruby</category>
         
