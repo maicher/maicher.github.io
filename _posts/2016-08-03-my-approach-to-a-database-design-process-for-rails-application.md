@@ -15,7 +15,7 @@ The application was acquiring that data from FTP.
 
 You can read more about that app [here](/freelance-ruby-or-rails-application-development).
 
-In this article I'd like to describe my thought process behind designing a peace of database for that application.
+In this article I'd like to describe my thought process behind designing a piece of database for that application.
 The part of database, that I want to show is simple, only 3 tables.
 My goal is to point out some implementation details, thanks to which I'm 100% sure to say, that __application, based on that database design will never loose it's [data integrity](https://en.wikipedia.org/wiki/Data_integrity)__.
 I invite you to read!

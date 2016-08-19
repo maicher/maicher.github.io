@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Freelance Ruby on Rails application development</title>
+  <title>Freelance full stack Ruby on Rails application development</title>
   <meta name="description" content="Introduction">
 
   <link rel="stylesheet" href="/css/main.css">
@@ -63,7 +63,7 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Freelance Ruby on Rails application development</h1>
+    <h1 class="post-title">Freelance full stack Ruby on Rails application development</h1>
     <p class="post-meta">Jul 12, 2016 • Krzysztof Maicher • <i>ruby rails freelance angular angularjs application web application software development </i></p>
   </header>
 
@@ -75,7 +75,7 @@
 <h3 id="background">Background</h3>
 
 <p>The client was an employment agency, that organizes work for people in agricultural sector. They also provide accommodation for their employees during the time of their employment. The client wanted to be able to monitor gas and electricity consumption in those places.
-They already had meters installed (a kind of <a href="https://en.wikipedia.org/wiki/Smart_meter">Smart Meters</a>) at those places. These meter were performing <strong>readings</strong> every few minutes and collecting them as <strong>files on FTP server</strong>.
+They already had meters installed (a kind of <a href="https://en.wikipedia.org/wiki/Smart_meter">Smart Meters</a>) at those places. These meters were performing <strong>readings</strong> every few minutes and collecting them as <strong>files on FTP server</strong>.
 It was hard for the client to view and manage these reading, so the client was looking for a solution, that would view all these data in a more friendly form, like <strong>tables and charts</strong>.
 They also wanted to group these data by addresses, perform some comparisons, see daily and hourly usage in selected date ranges and have costs per person automatically calculated.
 They contacted me and asked to propose a solution.</p>
@@ -88,7 +88,7 @@ I proposed following solution, consisting of three parts:</p>
 <ul>
   <li>An admin panel with classic CRUD for managing addresses and settings (Ruby on Rails, PostgreSQL).</li>
   <li>A script, acquiring data from ftp server (Ruby, CRON).</li>
-  <li>Minimalistic frontend with a nice tables and charts (HTML/CSS, Bootstrap3, JavaScript with some AngularJS inserts).</li>
+  <li>Minimalistic frontend with a nice tables and charts (HTML/CSS, Bootstrap3, JavaScript/CoffeeScript with some AngularJS inserts for better UX).</li>
 </ul>
 
 <p>I contacted the client to discuss each of above part once again. I wanted to check, if I understood their requirements.
@@ -104,9 +104,17 @@ I mean to keep the code decoupled, write tests, pay attention to data integrity 
 
 <h3 id="results">Results</h3>
 
-<p>In future posts I will try to show some code snippets.</p>
+<p>I used following technology stack, to build the application:</p>
 
-<p>Here are some screens of the finished app.</p>
+<ul>
+  <li>Ruby 2.2</li>
+  <li>Rails 4.2</li>
+  <li>PostgreSQL 9.4</li>
+  <li>AngularJS 1.4</li>
+  <li>Bootstrap 3</li>
+</ul>
+
+<p>Here are some screens of the finished app:</p>
 
 <div style="width:100%;text-align:center;margin-bottom:40px">
     <a target="_blank" href="/assets/gt_dashboard.jpg"><img style="max-width:350px" src="/assets/min/gt_dashboard.jpg" alt="Bar charts showing gas and electricity cost for each address in selected date range" /></a>
@@ -155,6 +163,12 @@ I mean to keep the code decoupled, write tests, pay attention to data integrity 
     <br />
     <caption align="bottom">Statistics</caption>
 </div>
+
+<p>Here are other articles related to that application:</p>
+
+<ul>
+  <li><a href="/my-approach-to-a-database-design-process-for-rails-application.html">My approach to a database design process for Rails application</a></li>
+</ul>
 
   </article>
 
