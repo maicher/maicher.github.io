@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://maicher.github.io/animated-spinner-for-ruby-command-line.html</loc>
+<lastmod>2016-10-23T20:30:00+02:00</lastmod>
+</url>
+<url>
 <loc>http://maicher.github.io/my-approach-to-a-database-design-process-for-rails-application.html</loc>
 <lastmod>2016-08-03T22:00:00+02:00</lastmod>
 </url>

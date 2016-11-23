@@ -6,4 +6,5 @@ group :jekyll_plugins do
   gem 'jekyll-lunr-js-search', '~> 3.1'
   gem 'jekyll-sitemap'
   gem 'jekyll-assets'
+  gem 'jekyll-gist'
 end

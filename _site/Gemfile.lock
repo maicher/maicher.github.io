@@ -151,9 +151,10 @@ PLATFORMS
 DEPENDENCIES
   github-pages
   jekyll-assets
+  jekyll-gist
   jekyll-lunr-js-search (~> 3.1)
   jekyll-paginate
   jekyll-sitemap
 
 BUNDLED WITH
-   1.12.5
+   1.13.6

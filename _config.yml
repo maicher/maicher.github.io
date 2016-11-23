@@ -1,4 +1,6 @@
-gems: [jekyll-paginate]
+gems:
+  - jekyll-paginate
+  - jekyll-gist
 
 title: Krzysztof Maicher
 email: krzysztof.maicher@gmail.com
@@ -18,7 +20,7 @@ github_username:  maicher
 stackoverflow_username: 'users/2933305/maicher'
 
 kramdown:
-  input:          GFM
+  input: GFM
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     css_class: 'highlight'

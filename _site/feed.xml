@@ -5,9 +5,101 @@
     <description></description>
     <link>http://maicher.github.io/</link>
     <atom:link href="http://maicher.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 19 Aug 2016 17:45:49 +0200</pubDate>
-    <lastBuildDate>Fri, 19 Aug 2016 17:45:49 +0200</lastBuildDate>
+    <pubDate>Wed, 23 Nov 2016 18:28:26 +0100</pubDate>
+    <lastBuildDate>Wed, 23 Nov 2016 18:28:26 +0100</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Animated Spinner for Ruby Command Line</title>
+        <description>&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/maicher/cli_spinnable&quot;&gt;&lt;strong&gt;CliSpinnable&lt;/strong&gt;&lt;/a&gt; is a gem that enriches Ruby CLI by:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;spinner&lt;/li&gt;
+  &lt;li&gt;tick mark (✓)&lt;/li&gt;
+  &lt;li&gt;fail mark (×)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;what-for&quot;&gt;What for?&lt;/h2&gt;
+
+&lt;p&gt;In command line programs it is always nice to se information describing what is happening at the moment.&lt;/p&gt;
+
+&lt;p&gt;This information ensures us, that the program isn’t hanging.&lt;/p&gt;
+
+&lt;p&gt;When building command line program, you can choose outputting some logs.&lt;/p&gt;
+
+&lt;p&gt;Sometimes, on long tasks without any meaningful logs, it makes sense to show animated spinner.&lt;/p&gt;
+
+&lt;p&gt;Then &lt;em&gt;CliSpinnable&lt;/em&gt; can be handy.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-to-use&quot;&gt;How to use?&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;CliSpinnable&lt;/strong&gt; gem doesn’t require any configuration.
+It makes it easy to use, but in the same time it’s not very flexible and it will suit only to specific use cases, such as described in demo section.&lt;/p&gt;
+
+&lt;p&gt;It’s main feature is &lt;code class=&quot;highlighter-rouge&quot;&gt;CliSpinnable.with_spinner&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;Call it with the block and then use &lt;code class=&quot;highlighter-rouge&quot;&gt;#print&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;#tick&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;#fail&lt;/code&gt; methods:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/eec6436a5e171e91108304736f943642.js&quot;&gt; &lt;/script&gt;
+
+&lt;p&gt;Can also be mixed-in to the class:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/c5e09d6b088276a701fed47d0ca7fecd.js&quot;&gt; &lt;/script&gt;
+
+&lt;h2 id=&quot;idea&quot;&gt;Idea&lt;/h2&gt;
+
+&lt;p&gt;Lat’s say, that you are building a CLI script in Ruby, that downloads some data and then processes it.&lt;/p&gt;
+
+&lt;p&gt;Each of those two steps can take few seconds to execute.&lt;/p&gt;
+
+&lt;p&gt;Each of them can either fail or succeed, so it would be nice to be able to mark them with a:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;success mark (✓) when step will succeed,&lt;/li&gt;
+  &lt;li&gt;or fail mark (×) followed by error when something will fail.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;demo&quot;&gt;Demo&lt;/h2&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/405a10faebfe31f9f2225805d15dc3f7.js&quot;&gt; &lt;/script&gt;
+
+&lt;p&gt;&lt;strong&gt;Output:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/maicher/cli_spinnable/master/examples/demo.gif&quot; alt=&quot;demo.git&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;You can check out more examples &lt;a href=&quot;https://github.com/maicher/cli_spinnable/tree/master/examples&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;feedback&quot;&gt;Feedback&lt;/h2&gt;
+
+&lt;p&gt;Since I constantly learn Ruby and OOP, your feedback is welcome.&lt;/p&gt;
+
+&lt;p&gt;Feel free to checkout and analyze the gem source_code, you can find there:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;asynchronous writing to &lt;code class=&quot;highlighter-rouge&quot;&gt;STDOUT&lt;/code&gt; using &lt;code class=&quot;highlighter-rouge&quot;&gt;Thread&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;Queue&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Refine&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;Using&lt;/code&gt; applied on &lt;code class=&quot;highlighter-rouge&quot;&gt;String&lt;/code&gt; for adding colors to outputted text&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Enumerable#cycle&lt;/code&gt; for infinitive spinner rotation&lt;/li&gt;
+  &lt;li&gt;tests using Rspec&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;other-solutions&quot;&gt;Other solutions&lt;/h2&gt;
+
+&lt;p&gt;There are other solutions, solving the same problem in similar or different ways 
+(&lt;a href=&quot;https://rubygems.org/search?utf8=%E2%9C%93&amp;amp;query=spinner&quot;&gt;spinner&lt;/a&gt;, &lt;a href=&quot;https://rubygems.org/search?utf8=%E2%9C%93&amp;amp;query=spinner&quot;&gt;spinning&lt;/a&gt;),
+however I hope you will like &lt;em&gt;CliSpinnable&lt;/em&gt; the most and choose it when needed.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 23 Oct 2016 20:30:00 +0200</pubDate>
+        <link>http://maicher.github.io/animated-spinner-for-ruby-command-line.html</link>
+        <guid isPermaLink="true">http://maicher.github.io/animated-spinner-for-ruby-command-line.html</guid>
+        
+        <category>ruby</category>
+        
+        <category>rubygems</category>
+        
+        
+      </item>
     
       <item>
         <title>My approach to a database design process for Rails application</title>
