@@ -74,9 +74,3 @@ Feel free to checkout and analyze the gem source_code, you can find there:
 - `Refine`/`Using` applied on `String` for adding colors to outputted text
 - `Enumerable#cycle` for infinitive spinner rotation
 - tests using Rspec
-
-## Other solutions
-
-There are other solutions, solving the same problem in similar or different ways 
-([spinner](https://rubygems.org/search?utf8=%E2%9C%93&query=spinner), [spinning](https://rubygems.org/search?utf8=%E2%9C%93&query=spinning)),
-however I hope you will like _CliSpinnable_ the most and try it sometime.

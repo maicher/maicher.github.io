@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: 'My approach to a database design process for Rails application'
+title: 'How to design a solid database for Rails application'
 author: Krzysztof Maicher
 date: 2016-08-03 20:00:00
 categories:
@@ -10,36 +10,33 @@ tags: [Ruby, Rails, database, PostgreSQL]
 
 ### Introduction
 
-Some time ago, I've created a Ruby on Rails application, which purpose was to present data (electric and gas meter readings) by charts and tables.
-The application was acquiring that data from FTP.
+From my perspective a poorly designed database can cause a lot of pain when data starts loosing it's integrity on production.
+I've seen, that sometimes Rails developers jump into generating ActiveRecord models (using `rails generate model ...`) without really paying attention how the resulting database will look like.
 
-You can read more about that app [here](/freelance-ruby-or-rails-application-development).
-
-In this article I'd like to describe my thought process behind designing a piece of database for that application.
-The part of database, that I want to show is simple, only 3 tables.
-My goal is to point out some implementation details, thanks to which I'm 100% sure to say, that __application, based on that database design will never loose it's [data integrity](https://en.wikipedia.org/wiki/Data_integrity)__.
+In this article I'd like to show an opposite approach, by describing my thought process behind designing a piece of database for one application I've build lastly.
+My goal is to point out some details, thanks to which I'm 100% sure to say, that __application, based on that database design will never loose it's [data integrity](https://en.wikipedia.org/wiki/Data_integrity)__.
 I invite you to read!
 
 ### Analyze data
 
-Data, that were stored on FTP by meters, had following characteristics:
+The purpose of [the application](/freelance-ruby-or-rails-application-development) was to present data (electric and gas meter readings) by charts and tables.
+
+Data, that was stored on FTP by meters, had following characteristics:
 
 - there are around 40 meters, each identified by its unique 18-digit number
-- each meter puts its measurements on ftp server as a csv file
-- each file has about 50 lines
-- one line represent one reading (two values, timestamp and a meter number)
-- around 40 new files a day (can be more in future)
+- meter measurements are stored on ftp server as a csv file
+- each file has about 50 readings (timestamp, meter number and values)
+- around 40 new files a day
 - that gives around 2k new readings every day
 
-Over a year, the data would grow to _2k x 365_, that is around _0.7M_ records each year.
-That is not that much and a properly designed _PostgreSQL_ database should handle that amount of data without any performance problems for years.
+Over a year, the data would grow to _2k x 365_, that is around _0.7_ million records each year.
+That is not that much and a properly designed _PostgreSQL_ database should handle that amount of data without performance problems for years.
 I wanted to store that data in a relational database, that would allow me to easily access it in other part of application, to present it as charts or tables.
 
 ### Database design upfront
 
 I decided, that the application will interact with database by ActiveRecord. I like ActiveRecord, because of its ease of use.
 However, when it comes to creating new ActiveRecord models, my approach may be different from other Rails developers.
-I've seen, that sometimes Rails developers jump into generating ActiveRecord models (using `rails generate model ...`) without really paying attention to how the resulting database will look like.
 
 I like to come up with a __database design upfront__ (in mind, on paper or in some tool) and after that, I start creating ActiveRecord models to satisfy the database design.
 In other words I design database at first, and then build an __ActiveRecord models layer on top of it__.
@@ -143,11 +140,11 @@ end
 
 #### Foreign keys
 
-What is seen in 10'th line in above migration is a [foreign key](https://www.postgresql.org/docs/8.1/static/tutorial-fk.html).
+What is seen in 10'th line in above migration is a [foreign key constraint](https://www.postgresql.org/docs/8.1/static/tutorial-fk.html).
 _meters_ and _readings_ tables are related.
-A foreign key is a mechanism, that keeps so called _referential integrity_ of that two tables.
+A foreign key constraint is a mechanism, that keeps so called _referential integrity_ of that two tables.
 It prevents inserting reading related to non-existent meter and prevents from deleting meter, that has related readings.
-In other words, a __foreign key prevents the occurrence of [orphaned records](http://www.dhdursoassociates.com/database-glossary-3.html#orphan)__ in readings table.
+In other words, a __foreign key constraints prevents the occurrence of [orphaned records](http://www.dhdursoassociates.com/database-glossary-3.html#orphan)__ in readings table.
 
 ### ActiveRecord validations
 
@@ -163,7 +160,7 @@ __ActiveRecord validations doesn't guarantee application's data integrity__.
 Since above methods are available in whole application, it's crazy to assume, that nobody ever will use them!
 
 - Because developer can write to database tables by using raw SQL queries, or even log into psql console to run some updates or inserts.
-- Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read _Concurrency and integrity_ section in [documentation](http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of))
+- Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read _Concurrency and integrity_ section in [Rails documentation](http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of))
 
 ### Data integrity
 
@@ -171,7 +168,7 @@ Summarizing, if you want to prevent an application from loosing it's data integr
 ActiveRecord validations can not be rely on.
 Using ActiveRecord models speeds up the development process, but using them without a solidly designed database can lead to frustrations and to lots of maintenance work, when data will start loosing its integrity in production.
 
-When you aim for a solid database design, learn about foreign keys and start using them.
+When you aim for a solid database design, learn about foreign keys constraints and start using them.
 Start using uniqueness validations not only in ActiveRecord models, but at a database layer as well (including unique indexes on groups or inside json fields).
 Use not-null constraints if column can't be blank and specify a default value.
 
