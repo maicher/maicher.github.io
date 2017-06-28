@@ -34,7 +34,14 @@ blockquote { color: #828282; border-left: 4px solid #e8e8e8; padding-left: 15px;
 blockquote > :last-child { margin-bottom: 0; }
 
 /** Code formatting */
-pre, code { font-size: 15px; border: 1px solid #e8e8e8; border-radius: 3px; background-color: #eef; }
+pre, code { font-size: 15px; border: 1px solid #e8e8e8; border-radius: 3px; }
+
+.code { background-color: white; }
+.code pre { font-size: 13px; }
+
+.lineno { border: 0; padding: 2px; color: #ccc; font-size: 13px; }
+
+.gutter { width: 32px; }
 
 code { padding: 1px 5px; }
 
@@ -51,6 +58,9 @@ pre > code { border: 0; padding-right: 0; padding-left: 0; }
 /** Icons */
 .icon > svg { display: inline-block; width: 16px; height: 16px; vertical-align: middle; }
 .icon > svg path { fill: #828282; }
+
+.highlight { background-color: #fdfdfd !important; margin-left: -34px; }
+.highlight table { width: 100%; }
 
 /** Site header */
 .site-header { border-top: 5px solid #424242; border-bottom: 1px solid #e8e8e8; min-height: 80px; position: relative; }

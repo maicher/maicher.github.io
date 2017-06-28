@@ -130,7 +130,25 @@ code {
     font-size: 15px;
     border: 1px solid $grey-color-light;
     border-radius: 3px;
-    background-color: #eef;
+}
+
+.code {
+    background-color: white;
+
+    pre {
+        font-size: 13px;
+    }
+}
+
+.lineno {
+    border: 0;
+    padding: 2px;
+    color: #ccc;
+    font-size: 13px;
+}
+
+.gutter {
+    width: 32px
 }
 
 code {
@@ -200,5 +218,13 @@ pre {
         path {
             fill: $grey-color;
         }
+    }
+}
+
+.highlight {
+    background-color: #fdfdfd !important;
+    margin-left: -34px;
+    table {
+        width: 100%
     }
 }

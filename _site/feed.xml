@@ -3,11 +3,406 @@
   <channel>
     <title>Krzysztof Maicher</title>
     <description></description>
-    <link>http://maicher.github.io/</link>
-    <atom:link href="http://maicher.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 23 Nov 2016 18:28:26 +0100</pubDate>
-    <lastBuildDate>Wed, 23 Nov 2016 18:28:26 +0100</lastBuildDate>
-    <generator>Jekyll v3.1.6</generator>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Wed, 28 Jun 2017 18:01:55 +0200</pubDate>
+    <lastBuildDate>Wed, 28 Jun 2017 18:01:55 +0200</lastBuildDate>
+    <generator>Jekyll v3.4.3</generator>
+    
+      <item>
+        <title>How to keep rspecs DRY</title>
+        <description>&lt;h3 id=&quot;intro&quot;&gt;Intro&lt;/h3&gt;
+
+&lt;p&gt;I want to address a specific, &lt;strong&gt;low-level duplication problem&lt;/strong&gt;, that I see often in &lt;em&gt;rspec&lt;/em&gt; tests.&lt;/p&gt;
+
+&lt;h3 id=&quot;why&quot;&gt;Why?&lt;/h3&gt;
+
+&lt;p&gt;Tests are software, so design concepts apply to them as well.
+One of the keys is to keep them &lt;a href=&quot;http://wiki.c2.com/?DontRepeatYourself&quot;&gt;DRY&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;use-case&quot;&gt;Use case&lt;/h3&gt;
+
+&lt;p&gt;Take a look at this Ruby class.&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Foo&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;initialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:)&lt;/span&gt;
+    &lt;span class=&quot;vi&quot;&gt;@dependency&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;an_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#...&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;A class with one depencency, that responds to one method which takes one argument.&lt;/p&gt;
+
+&lt;p&gt;For simplicity, lets assume that &lt;code class=&quot;highlighter-rouge&quot;&gt;#call&lt;/code&gt; is a &lt;a href=&quot;https://martinfowler.com/bliki/CommandQuerySeparation.html&quot;&gt;query method&lt;/a&gt;,
+which can be tested by asserting a return value.&lt;/p&gt;
+
+&lt;h3 id=&quot;specs&quot;&gt;SPECS&lt;/h3&gt;
+
+&lt;p&gt;What I observe, developers tend to write specs in a structure more or less like:&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:a_dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:other_dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  
+  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'#call'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when initilaized with a_dependency'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a_dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;123&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when not something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a_dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;456&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when initialized with other_dependency'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;other_dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;234&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when not something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;other_dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;567&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Different contexts are covered. Subjects are described.
+I believe that by looking on it you can tell what is going on there.&lt;/p&gt;
+
+&lt;p&gt;However there are some &lt;strong&gt;repetitions&lt;/strong&gt; which violates DRY principle:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Tested class name &lt;code class=&quot;highlighter-rouge&quot;&gt;Foo&lt;/code&gt; is used few times (in lines: 1, 9, 15, 23, 29).&lt;/li&gt;
+  &lt;li&gt;Knowledge about how to instantialize tested class is duplicated in each example (lines: 9, 15, 23, 29).&lt;/li&gt;
+  &lt;li&gt;Knowledge about how to call tested method is duplicated as well (lines: 10, 16, 24, 30).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In other words, if one of the followings change:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;class name,&lt;/li&gt;
+  &lt;li&gt;way of initializing (more/less dependency),&lt;/li&gt;
+  &lt;li&gt;method name,&lt;/li&gt;
+  &lt;li&gt;arguments number.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;..if one of the above change, 4-5 lines would have to be changed to keep the tests up to date.&lt;/p&gt;
+
+&lt;p&gt;It’s not &lt;em&gt;that&lt;/em&gt; problematic, but still, improving makes sense.&lt;/p&gt;
+
+&lt;h3 id=&quot;refactor-step-1---move-lets-into-their-contexts&quot;&gt;Refactor #step 1 - move &lt;em&gt;lets&lt;/em&gt; into their &lt;em&gt;contexts&lt;/em&gt;&lt;/h3&gt;
+
+&lt;p&gt;Because declaring them on the top makes an impression that two dependencies need’s to be initialized in order to run the specs.
+Which is not true - only one dependency is needed. There are two of them, because of two &lt;em&gt;contexts&lt;/em&gt;.
+So moving them into their &lt;em&gt;contexts&lt;/em&gt; makes it easier to follow.
+&lt;em&gt;Contexts&lt;/em&gt; descriptions is making it clear how they vary between each other and the fact
+that they have the same names makes it easier to understand that they represent the same being (lines: 4, 20)&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'#call'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when initilaized with a dependency'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when not something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when initialized with other dependency'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+      
+      &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;refactor-step-2---keep-knowledge-how-to-initialize-tested-class-in-one-place&quot;&gt;Refactor #step 2 - keep knowledge how to initialize tested class in one place&lt;/h3&gt;
+
+&lt;p&gt;Because this knowledge is common for all examples.&lt;/p&gt;
+
+&lt;p&gt;In different &lt;em&gt;contexts&lt;/em&gt; different dependencies are used to instantialize tested class. They can be declared after declaring the &lt;em&gt;subject&lt;/em&gt;.
+We can describe how to build &lt;em&gt;subject&lt;/em&gt; in line 3 before declaring it’s dependency (line 6), because of &lt;em&gt;subjest&lt;/em&gt;’s lazy evaluation
+(it’s evaluated in line 7, not 3).&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'#call'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when initilaized with a dependency'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; 
+      &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# ...&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;When we would like to test more methods, we would have to create more &lt;em&gt;describe&lt;/em&gt; blocks.
+Then I’d suggest abstracting the knowledge about how to initialize tested class to a &lt;em&gt;let&lt;/em&gt; block at the top and reuse
+it in &lt;em&gt;subject&lt;/em&gt; declarations.&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;dependency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'#a_method'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;a_method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# ...&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  
+  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'#other_method'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;other_method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# ...&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h3 id=&quot;refactor-step-3---keep-knowledge-how-to-call-tested-method-in-one-place&quot;&gt;Refactor #step 3 - keep knowledge how to call tested method in one place&lt;/h3&gt;
+
+&lt;p&gt;For the same reasons as in previous step.&lt;/p&gt;
+
+&lt;p&gt;I mean instead of duplicating &lt;code class=&quot;highlighter-rouge&quot;&gt;subject.call(argument)&lt;/code&gt; in each expectation, we can move calling this method into the
+&lt;em&gt;subject&lt;/em&gt;, because it’s the same in each case (line 5 in below &lt;em&gt;final&lt;/em&gt; listing).&lt;/p&gt;
+
+&lt;h3 id=&quot;final-version&quot;&gt;Final version&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Tested class name is used once (line: 1 - &lt;a href=&quot;https://relishapp.com/rspec/rspec-core/docs/metadata/described-class&quot;&gt;described_class&lt;/a&gt;).&lt;/li&gt;
+  &lt;li&gt;Knowledge how to instantialize tested class is in one place (line: 2).&lt;/li&gt;
+  &lt;li&gt;Knowledge how to call tested method is in one place, following its &lt;em&gt;describe&lt;/em&gt; block (line: 5).&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;let&lt;/em&gt; blocks are declared within their &lt;em&gt;contexts&lt;/em&gt; (lines: &lt;code class=&quot;highlighter-rouge&quot;&gt;8 and 22&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;11 and 16&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;25 and 30&lt;/code&gt;).&lt;/li&gt;
+  &lt;li&gt;Read it from top to bottom and you will see a structure &lt;strong&gt;descending from general to detailed&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;described_class&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;depencency: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  
+  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'#call'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when initilaized with a dependency'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; 
+
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;123&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when not something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;456&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when initialized with other dependency'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;234&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+      &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'when not something'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;567&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Practice writing DRY specs. This habit pays of.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Removing duplication from testing lowers the cost of changing them in reaction to application changes(..)&lt;/em&gt;&lt;a href=&quot;#1&quot;&gt;[1]&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;more-reading&quot;&gt;More reading&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a name=&quot;1&quot;&gt;[1]&lt;/a&gt; Sandi Metz, &lt;em&gt;Practical Object-Oriented Design in Ruby&lt;/em&gt;, Addison-Wesley, 2013, p.195&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://youtu.be/URSWYvyc42M&quot;&gt;The Magic Tricks of Testing by Sandi Metz (video)&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/reachlocal/rspec-style-guide&quot;&gt;Rspec Style Guide&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.betterspecs.org&quot;&gt;www.betterspecs.org&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Wed, 28 Jun 2017 18:00:00 +0200</pubDate>
+        <link>http://localhost:4000/how-to-keep-rspecs-dry.html</link>
+        <guid isPermaLink="true">http://localhost:4000/how-to-keep-rspecs-dry.html</guid>
+        
+        <category>ruby</category>
+        
+        <category>rspec</category>
+        
+        <category>dry</category>
+        
+        
+      </item>
     
       <item>
         <title>Animated Spinner for Ruby Command Line</title>
@@ -83,16 +478,10 @@ It makes it easy to use, but in the same time it’s not very flexible and it wi
   &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Enumerable#cycle&lt;/code&gt; for infinitive spinner rotation&lt;/li&gt;
   &lt;li&gt;tests using Rspec&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;h2 id=&quot;other-solutions&quot;&gt;Other solutions&lt;/h2&gt;
-
-&lt;p&gt;There are other solutions, solving the same problem in similar or different ways 
-(&lt;a href=&quot;https://rubygems.org/search?utf8=%E2%9C%93&amp;amp;query=spinner&quot;&gt;spinner&lt;/a&gt;, &lt;a href=&quot;https://rubygems.org/search?utf8=%E2%9C%93&amp;amp;query=spinner&quot;&gt;spinning&lt;/a&gt;),
-however I hope you will like &lt;em&gt;CliSpinnable&lt;/em&gt; the most and choose it when needed.&lt;/p&gt;
 </description>
-        <pubDate>Sun, 23 Oct 2016 20:30:00 +0200</pubDate>
-        <link>http://maicher.github.io/animated-spinner-for-ruby-command-line.html</link>
-        <guid isPermaLink="true">http://maicher.github.io/animated-spinner-for-ruby-command-line.html</guid>
+        <pubDate>Wed, 23 Nov 2016 19:30:00 +0100</pubDate>
+        <link>http://localhost:4000/animated-spinner-for-ruby-command-line.html</link>
+        <guid isPermaLink="true">http://localhost:4000/animated-spinner-for-ruby-command-line.html</guid>
         
         <category>ruby</category>
         
@@ -102,41 +491,38 @@ however I hope you will like &lt;em&gt;CliSpinnable&lt;/em&gt; the most and choo
       </item>
     
       <item>
-        <title>My approach to a database design process for Rails application</title>
+        <title>How to design a solid database for Rails application</title>
         <description>&lt;h3 id=&quot;introduction&quot;&gt;Introduction&lt;/h3&gt;
 
-&lt;p&gt;Some time ago, I’ve created a Ruby on Rails application, which purpose was to present data (electric and gas meter readings) by charts and tables.
-The application was acquiring that data from FTP.&lt;/p&gt;
+&lt;p&gt;From my perspective a poorly designed database can cause a lot of pain when data starts loosing it’s integrity on production.
+I’ve seen, that sometimes Rails developers jump into generating ActiveRecord models (using &lt;code class=&quot;highlighter-rouge&quot;&gt;rails generate model ...&lt;/code&gt;) without really paying attention how the resulting database will look like.&lt;/p&gt;
 
-&lt;p&gt;You can read more about that app &lt;a href=&quot;/freelance-ruby-or-rails-application-development&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;In this article I’d like to describe my thought process behind designing a piece of database for that application.
-The part of database, that I want to show is simple, only 3 tables.
-My goal is to point out some implementation details, thanks to which I’m 100% sure to say, that &lt;strong&gt;application, based on that database design will never loose it’s &lt;a href=&quot;https://en.wikipedia.org/wiki/Data_integrity&quot;&gt;data integrity&lt;/a&gt;&lt;/strong&gt;.
+&lt;p&gt;In this article I’d like to show an opposite approach, by describing my thought process behind designing a piece of database for one application I’ve build lastly.
+My goal is to point out some details, thanks to which I’m 100% sure to say, that &lt;strong&gt;application, based on that database design will never loose it’s &lt;a href=&quot;https://en.wikipedia.org/wiki/Data_integrity&quot;&gt;data integrity&lt;/a&gt;&lt;/strong&gt;.
 I invite you to read!&lt;/p&gt;
 
 &lt;h3 id=&quot;analyze-data&quot;&gt;Analyze data&lt;/h3&gt;
 
-&lt;p&gt;Data, that were stored on FTP by meters, had following characteristics:&lt;/p&gt;
+&lt;p&gt;The purpose of &lt;a href=&quot;/freelance-ruby-or-rails-application-development&quot;&gt;the application&lt;/a&gt; was to present data (electric and gas meter readings) by charts and tables.&lt;/p&gt;
+
+&lt;p&gt;Data, that was stored on FTP by meters, had following characteristics:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;there are around 40 meters, each identified by its unique 18-digit number&lt;/li&gt;
-  &lt;li&gt;each meter puts its measurements on ftp server as a csv file&lt;/li&gt;
-  &lt;li&gt;each file has about 50 lines&lt;/li&gt;
-  &lt;li&gt;one line represent one reading (two values, timestamp and a meter number)&lt;/li&gt;
-  &lt;li&gt;around 40 new files a day (can be more in future)&lt;/li&gt;
+  &lt;li&gt;meter measurements are stored on ftp server as a csv file&lt;/li&gt;
+  &lt;li&gt;each file has about 50 readings (timestamp, meter number and values)&lt;/li&gt;
+  &lt;li&gt;around 40 new files a day&lt;/li&gt;
   &lt;li&gt;that gives around 2k new readings every day&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Over a year, the data would grow to &lt;em&gt;2k x 365&lt;/em&gt;, that is around &lt;em&gt;0.7M&lt;/em&gt; records each year.
-That is not that much and a properly designed &lt;em&gt;PostgreSQL&lt;/em&gt; database should handle that amount of data without any performance problems for years.
+&lt;p&gt;Over a year, the data would grow to &lt;em&gt;2k x 365&lt;/em&gt;, that is around &lt;em&gt;0.7&lt;/em&gt; million records each year.
+That is not that much and a properly designed &lt;em&gt;PostgreSQL&lt;/em&gt; database should handle that amount of data without performance problems for years.
 I wanted to store that data in a relational database, that would allow me to easily access it in other part of application, to present it as charts or tables.&lt;/p&gt;
 
 &lt;h3 id=&quot;database-design-upfront&quot;&gt;Database design upfront&lt;/h3&gt;
 
 &lt;p&gt;I decided, that the application will interact with database by ActiveRecord. I like ActiveRecord, because of its ease of use.
-However, when it comes to creating new ActiveRecord models, my approach may be different from other Rails developers.
-I’ve seen, that sometimes Rails developers jump into generating ActiveRecord models (using &lt;code class=&quot;highlighter-rouge&quot;&gt;rails generate model ...&lt;/code&gt;) without really paying attention to how the resulting database will look like.&lt;/p&gt;
+However, when it comes to creating new ActiveRecord models, my approach may be different from other Rails developers.&lt;/p&gt;
 
 &lt;p&gt;I like to come up with a &lt;strong&gt;database design upfront&lt;/strong&gt; (in mind, on paper or in some tool) and after that, I start creating ActiveRecord models to satisfy the database design.
 In other words I design database at first, and then build an &lt;strong&gt;ActiveRecord models layer on top of it&lt;/strong&gt;.&lt;/p&gt;
@@ -276,11 +662,11 @@ I don’t want to see double readings in that database. Unique indexes guarantee
 
 &lt;h4 id=&quot;foreign-keys&quot;&gt;Foreign keys&lt;/h4&gt;
 
-&lt;p&gt;What is seen in 10’th line in above migration is a &lt;a href=&quot;https://www.postgresql.org/docs/8.1/static/tutorial-fk.html&quot;&gt;foreign key&lt;/a&gt;.
+&lt;p&gt;What is seen in 10’th line in above migration is a &lt;a href=&quot;https://www.postgresql.org/docs/8.1/static/tutorial-fk.html&quot;&gt;foreign key constraint&lt;/a&gt;.
 &lt;em&gt;meters&lt;/em&gt; and &lt;em&gt;readings&lt;/em&gt; tables are related.
-A foreign key is a mechanism, that keeps so called &lt;em&gt;referential integrity&lt;/em&gt; of that two tables.
+A foreign key constraint is a mechanism, that keeps so called &lt;em&gt;referential integrity&lt;/em&gt; of that two tables.
 It prevents inserting reading related to non-existent meter and prevents from deleting meter, that has related readings.
-In other words, a &lt;strong&gt;foreign key prevents the occurrence of &lt;a href=&quot;http://www.dhdursoassociates.com/database-glossary-3.html#orphan&quot;&gt;orphaned records&lt;/a&gt;&lt;/strong&gt; in readings table.&lt;/p&gt;
+In other words, a &lt;strong&gt;foreign key constraints prevents the occurrence of &lt;a href=&quot;http://www.dhdursoassociates.com/database-glossary-3.html#orphan&quot;&gt;orphaned records&lt;/a&gt;&lt;/strong&gt; in readings table.&lt;/p&gt;
 
 &lt;h3 id=&quot;activerecord-validations&quot;&gt;ActiveRecord validations&lt;/h3&gt;
 
@@ -299,7 +685,7 @@ I like to use ActiveRecord validations, since they are helpful in generating nic
 
 &lt;ul&gt;
   &lt;li&gt;Because developer can write to database tables by using raw SQL queries, or even log into psql console to run some updates or inserts.&lt;/li&gt;
-  &lt;li&gt;Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read &lt;em&gt;Concurrency and integrity&lt;/em&gt; section in &lt;a href=&quot;http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of&quot;&gt;documentation&lt;/a&gt;)&lt;/li&gt;
+  &lt;li&gt;Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read &lt;em&gt;Concurrency and integrity&lt;/em&gt; section in &lt;a href=&quot;http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of&quot;&gt;Rails documentation&lt;/a&gt;)&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h3 id=&quot;data-integrity&quot;&gt;Data integrity&lt;/h3&gt;
@@ -308,7 +694,7 @@ I like to use ActiveRecord validations, since they are helpful in generating nic
 ActiveRecord validations can not be rely on.
 Using ActiveRecord models speeds up the development process, but using them without a solidly designed database can lead to frustrations and to lots of maintenance work, when data will start loosing its integrity in production.&lt;/p&gt;
 
-&lt;p&gt;When you aim for a solid database design, learn about foreign keys and start using them.
+&lt;p&gt;When you aim for a solid database design, learn about foreign keys constraints and start using them.
 Start using uniqueness validations not only in ActiveRecord models, but at a database layer as well (including unique indexes on groups or inside json fields).
 Use not-null constraints if column can’t be blank and specify a default value.&lt;/p&gt;
 
@@ -325,8 +711,8 @@ Use not-null constraints if column can’t be blank and specify a default value.
 &lt;p&gt;Having that, the client can rely on the data in that database. Meter readings can be kept there for years, without fear of loosing their consistency.&lt;/p&gt;
 </description>
         <pubDate>Wed, 03 Aug 2016 22:00:00 +0200</pubDate>
-        <link>http://maicher.github.io/my-approach-to-a-database-design-process-for-rails-application.html</link>
-        <guid isPermaLink="true">http://maicher.github.io/my-approach-to-a-database-design-process-for-rails-application.html</guid>
+        <link>http://localhost:4000/how-to-design-a-solid-database-for-rails-application.html</link>
+        <guid isPermaLink="true">http://localhost:4000/how-to-design-a-solid-database-for-rails-application.html</guid>
         
         <category>Ruby</category>
         
@@ -444,8 +830,8 @@ I mean to keep the code decoupled, write tests, pay attention to data integrity 
 &lt;/ul&gt;
 </description>
         <pubDate>Tue, 12 Jul 2016 11:11:04 +0200</pubDate>
-        <link>http://maicher.github.io/freelance-ruby-or-rails-application-development.html</link>
-        <guid isPermaLink="true">http://maicher.github.io/freelance-ruby-or-rails-application-development.html</guid>
+        <link>http://localhost:4000/freelance-ruby-or-rails-application-development.html</link>
+        <guid isPermaLink="true">http://localhost:4000/freelance-ruby-or-rails-application-development.html</guid>
         
         <category>ruby</category>
         
@@ -552,8 +938,8 @@ I mean to keep the code decoupled, write tests, pay attention to data integrity 
 &lt;h4 id=&quot;to-modify-foreign-keys-or-indexes-which-names-are-not-rails-default&quot;&gt;To modify foreign keys or indexes, which names are not Rails default&lt;/h4&gt;
 </description>
         <pubDate>Wed, 29 Jun 2016 10:24:10 +0200</pubDate>
-        <link>http://maicher.github.io/verifying-database-schema-in-console.html</link>
-        <guid isPermaLink="true">http://maicher.github.io/verifying-database-schema-in-console.html</guid>
+        <link>http://localhost:4000/verifying-database-schema-in-console.html</link>
+        <guid isPermaLink="true">http://localhost:4000/verifying-database-schema-in-console.html</guid>
         
         <category>ruby</category>
         

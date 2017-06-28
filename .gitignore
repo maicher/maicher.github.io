@@ -2,3 +2,4 @@
 .idea
 .idea/*
 .ruby-gemset
+.bundle

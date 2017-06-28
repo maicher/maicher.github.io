@@ -6,12 +6,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>My approach to a database design process for Rails application</title>
+  <title>How to design a solid database for Rails application</title>
   <meta name="description" content="Introduction">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://maicher.github.io/my-approach-to-a-database-design-process-for-rails-application.html">
-  <link rel="alternate" type="application/rss+xml" title="Krzysztof Maicher" href="http://maicher.github.io/feed.xml" />
+  <link rel="canonical" href="http://localhost:4000/how-to-design-a-solid-database-for-rails-application.html">
+  <link rel="alternate" type="application/rss+xml" title="Krzysztof Maicher" href="http://localhost:4000/feed.xml" />
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -50,6 +50,10 @@
         
           
         
+          
+        
+          
+        
       </div>
     </nav>
 
@@ -63,45 +67,42 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">My approach to a database design process for Rails application</h1>
+    <h1 class="post-title">How to design a solid database for Rails application</h1>
     <p class="post-meta">Aug 3, 2016 • Krzysztof Maicher • <i>Ruby Rails database PostgreSQL </i></p>
   </header>
 
   <article class="post-content">
     <h3 id="introduction">Introduction</h3>
 
-<p>Some time ago, I’ve created a Ruby on Rails application, which purpose was to present data (electric and gas meter readings) by charts and tables.
-The application was acquiring that data from FTP.</p>
+<p>From my perspective a poorly designed database can cause a lot of pain when data starts loosing it’s integrity on production.
+I’ve seen, that sometimes Rails developers jump into generating ActiveRecord models (using <code class="highlighter-rouge">rails generate model ...</code>) without really paying attention how the resulting database will look like.</p>
 
-<p>You can read more about that app <a href="/freelance-ruby-or-rails-application-development">here</a>.</p>
-
-<p>In this article I’d like to describe my thought process behind designing a piece of database for that application.
-The part of database, that I want to show is simple, only 3 tables.
-My goal is to point out some implementation details, thanks to which I’m 100% sure to say, that <strong>application, based on that database design will never loose it’s <a href="https://en.wikipedia.org/wiki/Data_integrity">data integrity</a></strong>.
+<p>In this article I’d like to show an opposite approach, by describing my thought process behind designing a piece of database for one application I’ve build lastly.
+My goal is to point out some details, thanks to which I’m 100% sure to say, that <strong>application, based on that database design will never loose it’s <a href="https://en.wikipedia.org/wiki/Data_integrity">data integrity</a></strong>.
 I invite you to read!</p>
 
 <h3 id="analyze-data">Analyze data</h3>
 
-<p>Data, that were stored on FTP by meters, had following characteristics:</p>
+<p>The purpose of <a href="/freelance-ruby-or-rails-application-development">the application</a> was to present data (electric and gas meter readings) by charts and tables.</p>
+
+<p>Data, that was stored on FTP by meters, had following characteristics:</p>
 
 <ul>
   <li>there are around 40 meters, each identified by its unique 18-digit number</li>
-  <li>each meter puts its measurements on ftp server as a csv file</li>
-  <li>each file has about 50 lines</li>
-  <li>one line represent one reading (two values, timestamp and a meter number)</li>
-  <li>around 40 new files a day (can be more in future)</li>
+  <li>meter measurements are stored on ftp server as a csv file</li>
+  <li>each file has about 50 readings (timestamp, meter number and values)</li>
+  <li>around 40 new files a day</li>
   <li>that gives around 2k new readings every day</li>
 </ul>
 
-<p>Over a year, the data would grow to <em>2k x 365</em>, that is around <em>0.7M</em> records each year.
-That is not that much and a properly designed <em>PostgreSQL</em> database should handle that amount of data without any performance problems for years.
+<p>Over a year, the data would grow to <em>2k x 365</em>, that is around <em>0.7</em> million records each year.
+That is not that much and a properly designed <em>PostgreSQL</em> database should handle that amount of data without performance problems for years.
 I wanted to store that data in a relational database, that would allow me to easily access it in other part of application, to present it as charts or tables.</p>
 
 <h3 id="database-design-upfront">Database design upfront</h3>
 
 <p>I decided, that the application will interact with database by ActiveRecord. I like ActiveRecord, because of its ease of use.
-However, when it comes to creating new ActiveRecord models, my approach may be different from other Rails developers.
-I’ve seen, that sometimes Rails developers jump into generating ActiveRecord models (using <code class="highlighter-rouge">rails generate model ...</code>) without really paying attention to how the resulting database will look like.</p>
+However, when it comes to creating new ActiveRecord models, my approach may be different from other Rails developers.</p>
 
 <p>I like to come up with a <strong>database design upfront</strong> (in mind, on paper or in some tool) and after that, I start creating ActiveRecord models to satisfy the database design.
 In other words I design database at first, and then build an <strong>ActiveRecord models layer on top of it</strong>.</p>
@@ -241,11 +242,11 @@ I don’t want to see double readings in that database. Unique indexes guarantee
 
 <h4 id="foreign-keys">Foreign keys</h4>
 
-<p>What is seen in 10’th line in above migration is a <a href="https://www.postgresql.org/docs/8.1/static/tutorial-fk.html">foreign key</a>.
+<p>What is seen in 10’th line in above migration is a <a href="https://www.postgresql.org/docs/8.1/static/tutorial-fk.html">foreign key constraint</a>.
 <em>meters</em> and <em>readings</em> tables are related.
-A foreign key is a mechanism, that keeps so called <em>referential integrity</em> of that two tables.
+A foreign key constraint is a mechanism, that keeps so called <em>referential integrity</em> of that two tables.
 It prevents inserting reading related to non-existent meter and prevents from deleting meter, that has related readings.
-In other words, a <strong>foreign key prevents the occurrence of <a href="http://www.dhdursoassociates.com/database-glossary-3.html#orphan">orphaned records</a></strong> in readings table.</p>
+In other words, a <strong>foreign key constraints prevents the occurrence of <a href="http://www.dhdursoassociates.com/database-glossary-3.html#orphan">orphaned records</a></strong> in readings table.</p>
 
 <h3 id="activerecord-validations">ActiveRecord validations</h3>
 
@@ -264,7 +265,7 @@ I like to use ActiveRecord validations, since they are helpful in generating nic
 
 <ul>
   <li>Because developer can write to database tables by using raw SQL queries, or even log into psql console to run some updates or inserts.</li>
-  <li>Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read <em>Concurrency and integrity</em> section in <a href="http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of">documentation</a>)</li>
+  <li>Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read <em>Concurrency and integrity</em> section in <a href="http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of">Rails documentation</a>)</li>
 </ul>
 
 <h3 id="data-integrity">Data integrity</h3>
@@ -273,7 +274,7 @@ I like to use ActiveRecord validations, since they are helpful in generating nic
 ActiveRecord validations can not be rely on.
 Using ActiveRecord models speeds up the development process, but using them without a solidly designed database can lead to frustrations and to lots of maintenance work, when data will start loosing its integrity in production.</p>
 
-<p>When you aim for a solid database design, learn about foreign keys and start using them.
+<p>When you aim for a solid database design, learn about foreign keys constraints and start using them.
 Start using uniqueness validations not only in ActiveRecord models, but at a database layer as well (including unique indexes on groups or inside json fields).
 Use not-null constraints if column can’t be blank and specify a default value.</p>
 
@@ -295,7 +296,7 @@ Use not-null constraints if column can’t be blank and specify a default value.
 <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'maichergithubio';
-    var disqus_identifier = '/my-approach-to-a-database-design-process-for-rails-application';
+    var disqus_identifier = '/how-to-design-a-solid-database-for-rails-application';
 
     //Below here is identical to what Disqus supply as universal code.
     /* * * DON'T EDIT BELOW THIS LINE * * */
