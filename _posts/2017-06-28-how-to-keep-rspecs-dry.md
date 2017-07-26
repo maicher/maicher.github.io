@@ -166,7 +166,7 @@ end
 ```
 
 When we would like to test more methods, we would have to create more _describe_ blocks.
-Then I'd suggest abstracting the knowledge about how to initialize tested class to a _let_ block at the top and reuse
+Then I'd suggest extracting the knowledge about how to initialize tested class to a _let_ block at the top and reuse
 it in _subject_ declarations.
 
 ```ruby

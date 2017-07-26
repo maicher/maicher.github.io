@@ -74,7 +74,7 @@
   <article class="post-content">
     <h3 id="intro">Intro</h3>
 
-<p>I want to address a specific, <strong>low-level duplication problem</strong>, that I see often in <em>rspec</em> tests.</p>
+<p>I want to share my thoughts about a specific, <strong>low-level duplication problem</strong>, that I see often in <em>rspec</em> tests.</p>
 
 <h3 id="why">Why?</h3>
 
@@ -318,7 +318,7 @@ We can describe how to build <em>subject</em> in line 3 before declaring it’s 
 </div>
 
 <p>When we would like to test more methods, we would have to create more <em>describe</em> blocks.
-Then I’d suggest abstracting the knowledge about how to initialize tested class to a <em>let</em> block at the top and reuse
+Then I’d suggest extracting the knowledge about how to initialize tested class to a <em>let</em> block at the top and reuse
 it in <em>subject</em> declarations.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1

@@ -5,15 +5,15 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 28 Jun 2017 18:01:55 +0200</pubDate>
-    <lastBuildDate>Wed, 28 Jun 2017 18:01:55 +0200</lastBuildDate>
+    <pubDate>Wed, 26 Jul 2017 11:02:56 +0200</pubDate>
+    <lastBuildDate>Wed, 26 Jul 2017 11:02:56 +0200</lastBuildDate>
     <generator>Jekyll v3.4.3</generator>
     
       <item>
         <title>How to keep rspecs DRY</title>
         <description>&lt;h3 id=&quot;intro&quot;&gt;Intro&lt;/h3&gt;
 
-&lt;p&gt;I want to address a specific, &lt;strong&gt;low-level duplication problem&lt;/strong&gt;, that I see often in &lt;em&gt;rspec&lt;/em&gt; tests.&lt;/p&gt;
+&lt;p&gt;I want to share my thoughts about a specific, &lt;strong&gt;low-level duplication problem&lt;/strong&gt;, that I see often in &lt;em&gt;rspec&lt;/em&gt; tests.&lt;/p&gt;
 
 &lt;h3 id=&quot;why&quot;&gt;Why?&lt;/h3&gt;
 
@@ -257,7 +257,7 @@ We can describe how to build &lt;em&gt;subject&lt;/em&gt; in line 3 before decla
 &lt;/div&gt;
 
 &lt;p&gt;When we would like to test more methods, we would have to create more &lt;em&gt;describe&lt;/em&gt; blocks.
-Then I’d suggest abstracting the knowledge about how to initialize tested class to a &lt;em&gt;let&lt;/em&gt; block at the top and reuse
+Then I’d suggest extracting the knowledge about how to initialize tested class to a &lt;em&gt;let&lt;/em&gt; block at the top and reuse
 it in &lt;em&gt;subject&lt;/em&gt; declarations.&lt;/p&gt;
 
 &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
@@ -408,7 +408,13 @@ it in &lt;em&gt;subject&lt;/em&gt; declarations.&lt;/p&gt;
         <title>Animated Spinner for Ruby Command Line</title>
         <description>&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://github.com/maicher/cli_spinnable&quot;&gt;&lt;strong&gt;CliSpinnable&lt;/strong&gt;&lt;/a&gt; is a gem that enriches Ruby CLI by:&lt;/p&gt;
+&lt;p&gt;I wrote &lt;a href=&quot;https://github.com/maicher/cli_spinnable&quot;&gt;a gem&lt;/a&gt; that enriches Ruby CLI by spinner.&lt;/p&gt;
+
+&lt;h2 id=&quot;why&quot;&gt;Why?&lt;/h2&gt;
+
+&lt;p&gt;Because existing solutions did not fit my use case.&lt;/p&gt;
+
+&lt;p&gt;I needed:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;spinner&lt;/li&gt;
@@ -416,22 +422,33 @@ it in &lt;em&gt;subject&lt;/em&gt; declarations.&lt;/p&gt;
   &lt;li&gt;fail mark (×)&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&quot;what-for&quot;&gt;What for?&lt;/h2&gt;
+&lt;h2 id=&quot;use-case&quot;&gt;Use case&lt;/h2&gt;
 
-&lt;p&gt;In command line programs it is always nice to se information describing what is happening at the moment.&lt;/p&gt;
+&lt;p&gt;I was building a CLI script in Ruby, that downloads some data and then processes it.&lt;/p&gt;
 
-&lt;p&gt;This information ensures us, that the program isn’t hanging.&lt;/p&gt;
+&lt;p&gt;There were few steps, each took few seconds to execute and could either fail or succeed.
+I wanted to be able to mark them with a:&lt;/p&gt;
 
-&lt;p&gt;When building command line program, you can choose outputting some logs.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;success mark (✓) when step succeed,&lt;/li&gt;
+  &lt;li&gt;or fail mark (×) followed by error message when step failed.&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;p&gt;Sometimes, on long tasks without any meaningful logs, it makes sense to show animated spinner.&lt;/p&gt;
+&lt;h2 id=&quot;how&quot;&gt;How?&lt;/h2&gt;
 
-&lt;p&gt;Then &lt;em&gt;CliSpinnable&lt;/em&gt; can be handy.&lt;/p&gt;
+&lt;p&gt;It’s written in pure Ruby, using:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;asynchronous writing to &lt;code class=&quot;highlighter-rouge&quot;&gt;STDOUT&lt;/code&gt; using &lt;code class=&quot;highlighter-rouge&quot;&gt;Thread&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;Queue&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Refine&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;Using&lt;/code&gt; applied on &lt;code class=&quot;highlighter-rouge&quot;&gt;String&lt;/code&gt; for adding colors to outputted text&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Enumerable#cycle&lt;/code&gt; for infinitive spinner rotation&lt;/li&gt;
+  &lt;li&gt;rspec tests&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h2 id=&quot;how-to-use&quot;&gt;How to use?&lt;/h2&gt;
 
 &lt;p&gt;&lt;strong&gt;CliSpinnable&lt;/strong&gt; gem doesn’t require any configuration.
-It makes it easy to use, but in the same time it’s not very flexible and it will suit only to specific use cases, such as described in demo section.&lt;/p&gt;
+It makes it easy to use, but in the same time it’s not very flexible and it will suit only specific use cases, such as described above.&lt;/p&gt;
 
 &lt;p&gt;It’s main feature is &lt;code class=&quot;highlighter-rouge&quot;&gt;CliSpinnable.with_spinner&lt;/code&gt; method.&lt;/p&gt;
 
@@ -443,19 +460,6 @@ It makes it easy to use, but in the same time it’s not very flexible and it wi
 
 &lt;script src=&quot;https://gist.github.com/maicher/c5e09d6b088276a701fed47d0ca7fecd.js&quot;&gt; &lt;/script&gt;
 
-&lt;h2 id=&quot;idea&quot;&gt;Idea&lt;/h2&gt;
-
-&lt;p&gt;Lat’s say, that you are building a CLI script in Ruby, that downloads some data and then processes it.&lt;/p&gt;
-
-&lt;p&gt;Each of those two steps can take few seconds to execute.&lt;/p&gt;
-
-&lt;p&gt;Each of them can either fail or succeed, so it would be nice to be able to mark them with a:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;success mark (✓) when step will succeed,&lt;/li&gt;
-  &lt;li&gt;or fail mark (×) followed by error when something will fail.&lt;/li&gt;
-&lt;/ul&gt;
-
 &lt;h2 id=&quot;demo&quot;&gt;Demo&lt;/h2&gt;
 
 &lt;script src=&quot;https://gist.github.com/maicher/405a10faebfe31f9f2225805d15dc3f7.js&quot;&gt; &lt;/script&gt;
@@ -465,19 +469,6 @@ It makes it easy to use, but in the same time it’s not very flexible and it wi
 &lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/maicher/cli_spinnable/master/examples/demo.gif&quot; alt=&quot;demo.git&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;You can check out more examples &lt;a href=&quot;https://github.com/maicher/cli_spinnable/tree/master/examples&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;feedback&quot;&gt;Feedback&lt;/h2&gt;
-
-&lt;p&gt;Since I constantly learn Ruby and OOP, your feedback is welcome.&lt;/p&gt;
-
-&lt;p&gt;Feel free to checkout and analyze the gem source_code, you can find there:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;asynchronous writing to &lt;code class=&quot;highlighter-rouge&quot;&gt;STDOUT&lt;/code&gt; using &lt;code class=&quot;highlighter-rouge&quot;&gt;Thread&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;Queue&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Refine&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;Using&lt;/code&gt; applied on &lt;code class=&quot;highlighter-rouge&quot;&gt;String&lt;/code&gt; for adding colors to outputted text&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Enumerable#cycle&lt;/code&gt; for infinitive spinner rotation&lt;/li&gt;
-  &lt;li&gt;tests using Rspec&lt;/li&gt;
-&lt;/ul&gt;
 </description>
         <pubDate>Wed, 23 Nov 2016 19:30:00 +0100</pubDate>
         <link>http://localhost:4000/animated-spinner-for-ruby-command-line.html</link>
