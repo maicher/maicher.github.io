@@ -78,7 +78,7 @@
 I’ve seen, that sometimes Rails developers jump into generating ActiveRecord models (using <code class="highlighter-rouge">rails generate model ...</code>) without really paying attention how the resulting database will look like.</p>
 
 <p>In this article I’d like to show an opposite approach, by describing my thought process behind designing a piece of database for one application I’ve build lastly.
-My goal is to point out some details, thanks to which I’m 100% sure to say, that <strong>application, based on that database design will never loose it’s <a href="https://en.wikipedia.org/wiki/Data_integrity">data integrity</a></strong>.
+My goal is to point out some details, thanks to which I’m 100% sure to say, that <strong>application, based on that database design will never loose it’s <a rel="nofollow" target="_blank" href="https://en.wikipedia.org/wiki/Data_integrity">data integrity</a></strong>.
 I invite you to read!</p>
 
 <h3 id="analyze-data">Analyze data</h3>
@@ -117,8 +117,8 @@ However, if more tables with more sophisticated relations would be necessary, I 
 <h3 id="ftpfiles-model">FtpFiles model</h3>
 
 <p>At first I came up with <em>ftp_files</em> table. My idea of <em>ftp_files</em> table was to store a list of file names, that have already been parsed. Just a list of file names.
-It would be pointless to allow keeping there empty names, that’s why I’ve set a <a href="https://www.postgresql.org/docs/9.3/static/ddl-constraints.html#AEN2486">not-null constraint</a>.
-To ensure <em>name</em> uniqueness I could set a <a href="https://www.postgresql.org/docs/9.4/static/indexes-unique.html">unique index</a> or <a href="https://www.postgresql.org/docs/9.3/static/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS">unique constraint</a>.
+It would be pointless to allow keeping there empty names, that’s why I’ve set a <a rel="nofollow" target="_blank" href="https://www.postgresql.org/docs/9.3/static/ddl-constraints.html#AEN2486">not-null constraint</a>.
+To ensure <em>name</em> uniqueness I could set a <a rel="nofollow" target="_blank" href="https://www.postgresql.org/docs/9.4/static/indexes-unique.html">unique index</a> or <a rel="nofollow" target="_blank" href="https://www.postgresql.org/docs/9.3/static/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS">unique constraint</a>.
 Both ensures uniqueness.
 Unique index would also improve performance on querying that table by that column, but lower insertions.
 At this moment, I did not know, whether my application needs an index on that column.
@@ -242,11 +242,11 @@ I don’t want to see double readings in that database. Unique indexes guarantee
 
 <h4 id="foreign-keys">Foreign keys</h4>
 
-<p>What is seen in 10’th line in above migration is a <a href="https://www.postgresql.org/docs/8.1/static/tutorial-fk.html">foreign key constraint</a>.
+<p>What is seen in 10’th line in above migration is a <a rel="nofollow" target="_blank" href="https://www.postgresql.org/docs/8.1/static/tutorial-fk.html">foreign key constraint</a>.
 <em>meters</em> and <em>readings</em> tables are related.
 A foreign key constraint is a mechanism, that keeps so called <em>referential integrity</em> of that two tables.
 It prevents inserting reading related to non-existent meter and prevents from deleting meter, that has related readings.
-In other words, a <strong>foreign key constraints prevents the occurrence of <a href="http://www.dhdursoassociates.com/database-glossary-3.html#orphan">orphaned records</a></strong> in readings table.</p>
+In other words, a <strong>foreign key constraints prevents the occurrence of <a rel="nofollow" target="_blank" href="http://www.dhdursoassociates.com/database-glossary-3.html#orphan">orphaned records</a></strong> in readings table.</p>
 
 <h3 id="activerecord-validations">ActiveRecord validations</h3>
 
@@ -265,7 +265,7 @@ I like to use ActiveRecord validations, since they are helpful in generating nic
 
 <ul>
   <li>Because developer can write to database tables by using raw SQL queries, or even log into psql console to run some updates or inserts.</li>
-  <li>Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read <em>Concurrency and integrity</em> section in <a href="http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of">Rails documentation</a>)</li>
+  <li>Because they always takes few steps to perform, so they are exposed to race conditions in concurrently running code (read <em>Concurrency and integrity</em> section in <a rel="nofollow" target="_blank" href="http://apidock.com/rails/v4.2.1/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of">Rails documentation</a>)</li>
 </ul>
 
 <h3 id="data-integrity">Data integrity</h3>
@@ -306,8 +306,8 @@ Use not-null constraints if column can’t be blank and specify a default value.
         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+<noscript>Please enable JavaScript to view the <a rel="nofollow" target="_blank" href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a rel="nofollow" target="_blank" href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 
 
 </div>

@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Verifying database schema in console</title>
-  <meta name="description" content="">
+  <meta name="description" content="In Rails we have a schema.rb file, where we can check, how our database looks like.">
 
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://localhost:4000/verifying-database-schema-in-console.html">
@@ -72,8 +72,7 @@
   </header>
 
   <article class="post-content">
-    
-<p>In Rails we have a <code class="highlighter-rouge">schema.rb</code> file, where we can check, how our database looks like.</p>
+    <p>In Rails we have a <code class="highlighter-rouge">schema.rb</code> file, where we can check, how our database looks like.</p>
 
 <p>However, logging in to database console can be sometimes useful.</p>
 
@@ -82,40 +81,40 @@
 <h3 id="psql-and-mysql-console-commands">PSQL and MySQL console commands</h3>
 
 <table>
+  <thead>
+    <tr>
+      <th><strong>Description</strong></th>
+      <th><strong>PostgreSQL</strong></th>
+      <th><strong>MySQL</strong></th>
+    </tr>
+  </thead>
   <tbody>
     <tr>
-      <td><strong>PostgreSQL</strong></td>
-      <td><strong>MySQL</strong></td>
-      <td><strong>Description</strong></td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
+      <td>show database list</td>
       <td><code class="highlighter-rouge">\list</code></td>
       <td><code class="highlighter-rouge">show databases;</code></td>
-      <td>show database list</td>
     </tr>
     <tr>
+      <td>connect to to database</td>
       <td><code class="highlighter-rouge">\connect DBNAME</code></td>
       <td><code class="highlighter-rouge">use DBNAME;</code></td>
-      <td>connec to to database</td>
     </tr>
     <tr>
+      <td>show all tables</td>
       <td><code class="highlighter-rouge">\dt</code></td>
       <td><code class="highlighter-rouge">show tables;</code></td>
-      <td>show all tables</td>
     </tr>
     <tr>
+      <td>show table details</td>
       <td><code class="highlighter-rouge">\d+ TABLE</code></td>
       <td><code class="highlighter-rouge">describe TABLE;</code></td>
-      <td>show table details</td>
     </tr>
     <tr>
+      <td>exit from console</td>
       <td><code class="highlighter-rouge">\q</code></td>
       <td><code class="highlighter-rouge">exit;</code></td>
-      <td>exit from console</td>
     </tr>
-  </tfoot>
+  </tbody>
 </table>
 
 <p> </p>
@@ -171,8 +170,8 @@
         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+<noscript>Please enable JavaScript to view the <a rel="nofollow" target="_blank" href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a rel="nofollow" target="_blank" href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 
 
 </div>

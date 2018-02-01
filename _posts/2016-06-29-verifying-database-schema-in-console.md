@@ -8,11 +8,6 @@ categories:
 tags: [ruby, rails, migrations, psql, PostgreSQL, MySQL]
 ---
 
-[//]: <> (tabelka)
-[//]: <> (przykład jsonb)
-[//]: <> (historia czemu mysql)
-
-
 In Rails we have a `schema.rb` file, where we can check, how our database looks like.
 
 However, logging in to database console can be sometimes useful.
@@ -21,13 +16,13 @@ Here are a list of needed console commands.
 
 ### PSQL and MySQL console commands
 
-__PostgreSQL__ | __MySQL__ | __Description__
-====|====|====
-`\list` | `show databases;` | show database list
-`\connect DBNAME` | `use DBNAME;` | connec to to database
-`\dt` | `show tables;` | show all tables
-`\d+ TABLE` | `describe TABLE;` | show table details
-`\q` | `exit;` | exit from console
+| __Description__ |__PostgreSQL__ | __MySQL__ |
+|---------------|-----------|--------------------- |
+| show database list |`\list` | `show databases;` |
+| connect to to database |`\connect DBNAME` | `use DBNAME;` |
+| show all tables |`\dt` | `show tables;` |
+| show table details |`\d+ TABLE` | `describe TABLE;` |
+| exit from console |`\q` | `exit;` |
 
 &nbsp;
 

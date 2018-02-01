@@ -127,13 +127,10 @@ blockquote {
  */
 pre,
 code {
-    font-size: 15px;
-    border: 1px solid $grey-color-light;
     border-radius: 3px;
-}
-
-.code {
+    padding: 1px 5px;
     background-color: white;
+    font-size: 13px;
 
     pre {
         font-size: 13px;
@@ -145,14 +142,13 @@ code {
     padding: 2px;
     color: #ccc;
     font-size: 13px;
+    background: none;
+    text-align: right;
 }
 
-.gutter {
-    width: 32px
-}
-
-code {
-    padding: 1px 5px;
+table tr td.gl {
+    width: 32px;
+    padding: 0;
 }
 
 pre {
@@ -227,4 +223,24 @@ pre {
     table {
         width: 100%
     }
+
+    border: 0
+}
+
+table {
+    padding: 10px;
+    background: #f3f3f3;
+}
+
+table th {
+    border-bottom: #ddd solid 1px
+}
+
+table td,
+table th {
+    padding: 5px 10px
+}
+
+.lineo {
+    text-align: right;
 }

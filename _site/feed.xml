@@ -5,9 +5,33 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 26 Jul 2017 11:02:56 +0200</pubDate>
-    <lastBuildDate>Wed, 26 Jul 2017 11:02:56 +0200</lastBuildDate>
+    <pubDate>Sat, 17 Mar 2018 11:24:07 +0100</pubDate>
+    <lastBuildDate>Sat, 17 Mar 2018 11:24:07 +0100</lastBuildDate>
     <generator>Jekyll v3.4.3</generator>
+    
+      <item>
+        <title>Sequence diagrams</title>
+        <description>&lt;p&gt;I just wrote an article for the software house where I work. 
+It’s about sequence diagrams. What they are and how to draw the conveniently.&lt;/p&gt;
+
+&lt;p&gt;Check out: &lt;a href=&quot;http://themasters.io/remote-colaboration-using-sequence-diagrams/&quot;&gt;http://themasters.io/remote-colaboration-using-sequence-diagrams&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Thu, 01 Feb 2018 14:11:04 +0100</pubDate>
+        <link>http://localhost:4000/sequence-diagrams.html</link>
+        <guid isPermaLink="true">http://localhost:4000/sequence-diagrams.html</guid>
+        
+        <category>sequence diagrams</category>
+        
+        <category>uml diagrams</category>
+        
+        <category>ruby</category>
+        
+        <category>oop</category>
+        
+        <category>software development</category>
+        
+        
+      </item>
     
       <item>
         <title>How to keep rspecs DRY</title>
@@ -845,8 +869,7 @@ I mean to keep the code decoupled, write tests, pay attention to data integrity 
     
       <item>
         <title>Verifying database schema in console</title>
-        <description>
-&lt;p&gt;In Rails we have a &lt;code class=&quot;highlighter-rouge&quot;&gt;schema.rb&lt;/code&gt; file, where we can check, how our database looks like.&lt;/p&gt;
+        <description>&lt;p&gt;In Rails we have a &lt;code class=&quot;highlighter-rouge&quot;&gt;schema.rb&lt;/code&gt; file, where we can check, how our database looks like.&lt;/p&gt;
 
 &lt;p&gt;However, logging in to database console can be sometimes useful.&lt;/p&gt;
 
@@ -855,40 +878,40 @@ I mean to keep the code decoupled, write tests, pay attention to data integrity 
 &lt;h3 id=&quot;psql-and-mysql-console-commands&quot;&gt;PSQL and MySQL console commands&lt;/h3&gt;
 
 &lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;&lt;strong&gt;Description&lt;/strong&gt;&lt;/th&gt;
+      &lt;th&gt;&lt;strong&gt;PostgreSQL&lt;/strong&gt;&lt;/th&gt;
+      &lt;th&gt;&lt;strong&gt;MySQL&lt;/strong&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
   &lt;tbody&gt;
     &lt;tr&gt;
-      &lt;td&gt;&lt;strong&gt;PostgreSQL&lt;/strong&gt;&lt;/td&gt;
-      &lt;td&gt;&lt;strong&gt;MySQL&lt;/strong&gt;&lt;/td&gt;
-      &lt;td&gt;&lt;strong&gt;Description&lt;/strong&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-  &lt;tfoot&gt;
-    &lt;tr&gt;
+      &lt;td&gt;show database list&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;\list&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;show databases;&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;show database list&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
+      &lt;td&gt;connect to to database&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;\connect DBNAME&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;use DBNAME;&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;connec to to database&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
+      &lt;td&gt;show all tables&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;\dt&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;show tables;&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;show all tables&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
+      &lt;td&gt;show table details&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;\d+ TABLE&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;describe TABLE;&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;show table details&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
+      &lt;td&gt;exit from console&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;\q&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;exit;&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;exit from console&lt;/td&gt;
     &lt;/tr&gt;
-  &lt;/tfoot&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 
 &lt;p&gt; &lt;/p&gt;

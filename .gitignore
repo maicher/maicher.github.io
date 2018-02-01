@@ -3,3 +3,6 @@
 .idea/*
 .ruby-gemset
 .bundle
+./tmp/*
+_pre_posts
+_pre_posts/*
