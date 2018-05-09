@@ -5,8 +5,8 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 08 May 2018 17:45:28 +0200</pubDate>
-    <lastBuildDate>Tue, 08 May 2018 17:45:28 +0200</lastBuildDate>
+    <pubDate>Wed, 09 May 2018 12:28:08 +0200</pubDate>
+    <lastBuildDate>Wed, 09 May 2018 12:28:08 +0200</lastBuildDate>
     <generator>Jekyll v3.4.3</generator>
     
       <item>
@@ -42,7 +42,13 @@ It’s about sequence diagrams. What they are and how to draw the conveniently.&
 &lt;h3 id=&quot;why&quot;&gt;Why?&lt;/h3&gt;
 
 &lt;p&gt;Tests are software, so design concepts apply to them as well.
-One of the keys is to keep them &lt;a href=&quot;http://wiki.c2.com/?DontRepeatYourself&quot;&gt;DRY&lt;/a&gt;.&lt;/p&gt;
+One of the key things is to keep them &lt;a href=&quot;http://wiki.c2.com/?DontRepeatYourself&quot;&gt;DRY&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In a words of Sandi Metz from &lt;em&gt;Practical Object-Oriented Design in Ruby&lt;/em&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;em&gt;Removing duplication from testing lowers the cost of changing them in reaction to application changes(..)&lt;/em&gt;&lt;a href=&quot;#1&quot;&gt;[1]&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;h3 id=&quot;use-case&quot;&gt;Use case&lt;/h3&gt;
 
@@ -69,14 +75,14 @@ One of the keys is to keep them &lt;a href=&quot;http://wiki.c2.com/?DontRepeatY
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;p&gt;A class with one depencency, that responds to one method which takes one argument.&lt;/p&gt;
+&lt;p&gt;A class with one dependency that responds to one method which takes one argument.&lt;/p&gt;
 
 &lt;p&gt;For simplicity, lets assume that &lt;code class=&quot;highlighter-rouge&quot;&gt;#call&lt;/code&gt; is a &lt;a href=&quot;https://martinfowler.com/bliki/CommandQuerySeparation.html&quot;&gt;query method&lt;/a&gt;,
 which can be tested by asserting a return value.&lt;/p&gt;
 
 &lt;h3 id=&quot;specs&quot;&gt;SPECS&lt;/h3&gt;
 
-&lt;p&gt;What I observe, developers tend to write specs in a structure more or less like:&lt;/p&gt;
+&lt;p&gt;What I’ve observed, developers tend to write specs structured more or less like:&lt;/p&gt;
 
 &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
 2
@@ -149,35 +155,36 @@ which can be tested by asserting a return value.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;p&gt;Different contexts are covered. Subjects are described.
-I believe that by looking on it you can tell what is going on there.&lt;/p&gt;
+&lt;p&gt;In above specs, different contexts are covered and subjects are described.
+I believe that by looking at it you can tell what is going on there.&lt;/p&gt;
 
-&lt;p&gt;However there are some &lt;strong&gt;repetitions&lt;/strong&gt; which violates DRY principle:&lt;/p&gt;
+&lt;p&gt;However, there are some &lt;strong&gt;repetitions&lt;/strong&gt; which violate DRY principle:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;Tested class name &lt;code class=&quot;highlighter-rouge&quot;&gt;Foo&lt;/code&gt; is used few times (in lines: 1, 9, 15, 23, 29).&lt;/li&gt;
-  &lt;li&gt;Knowledge about how to instantialize tested class is duplicated in each example (lines: 9, 15, 23, 29).&lt;/li&gt;
-  &lt;li&gt;Knowledge about how to call tested method is duplicated as well (lines: 10, 16, 24, 30).&lt;/li&gt;
+  &lt;li&gt;Knowledge about &lt;em&gt;how to instantiate&lt;/em&gt; tested class is duplicated in each example (lines: 9, 15, 23, 29).&lt;/li&gt;
+  &lt;li&gt;Knowledge about &lt;em&gt;how to call tested method&lt;/em&gt; is duplicated as well (lines: 10, 16, 24, 30).&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;In other words, if one of the followings change:&lt;/p&gt;
+&lt;p&gt;Therefore, if one of the followings change:&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;class name,&lt;/li&gt;
-  &lt;li&gt;way of initializing (more/less dependency),&lt;/li&gt;
+  &lt;li&gt;way of initializing (more/less injected dependencies),&lt;/li&gt;
   &lt;li&gt;method name,&lt;/li&gt;
   &lt;li&gt;arguments number.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;..if one of the above change, 4-5 lines would have to be changed to keep the tests up to date.&lt;/p&gt;
+&lt;p&gt;..if one of above change in code, then 4-5 specs lines need to be adjusted keep the tests up to date.&lt;/p&gt;
 
-&lt;p&gt;It’s not &lt;em&gt;that&lt;/em&gt; problematic, but still, improving makes sense.&lt;/p&gt;
+&lt;p&gt;It’s not &lt;em&gt;that&lt;/em&gt; problematic, but still, improving it makes sense.&lt;/p&gt;
 
 &lt;h3 id=&quot;refactor-step-1---move-lets-into-their-contexts&quot;&gt;Refactor #step 1 - move &lt;em&gt;lets&lt;/em&gt; into their &lt;em&gt;contexts&lt;/em&gt;&lt;/h3&gt;
 
 &lt;p&gt;Because declaring them on the top makes an impression that two dependencies need’s to be initialized in order to run the specs.
 Which is not true - only one dependency is needed. There are two of them, because of two &lt;em&gt;contexts&lt;/em&gt;.
-So moving them into their &lt;em&gt;contexts&lt;/em&gt; makes it easier to follow.
-&lt;em&gt;Contexts&lt;/em&gt; descriptions is making it clear how they vary between each other and the fact
+So moving them into their &lt;em&gt;contexts&lt;/em&gt; makes it easier to follow.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Contexts&lt;/em&gt; descriptions is making it clear how they vary between each other and the fact
 that they have the same names makes it easier to understand that they represent the same being (lines: 4, 20)&lt;/p&gt;
 
 &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
@@ -249,9 +256,10 @@ that they have the same names makes it easier to understand that they represent 
 
 &lt;p&gt;Because this knowledge is common for all examples.&lt;/p&gt;
 
-&lt;p&gt;In different &lt;em&gt;contexts&lt;/em&gt; different dependencies are used to instantialize tested class. They can be declared after declaring the &lt;em&gt;subject&lt;/em&gt;.
-We can describe how to build &lt;em&gt;subject&lt;/em&gt; in line 3 before declaring it’s dependency (line 6), because of &lt;em&gt;subjest&lt;/em&gt;’s lazy evaluation
-(it’s evaluated in line 7, not 3).&lt;/p&gt;
+&lt;p&gt;In different &lt;em&gt;contexts&lt;/em&gt;, different dependencies are used to instantiate tested class.
+These dependencies can be declared later (in line 6), in their contexts, after &lt;em&gt;subject&lt;/em&gt; declaration (line 3).&lt;/p&gt;
+
+&lt;p&gt;It works because of &lt;em&gt;subject&lt;/em&gt;’s lazy evaluation - code in &lt;em&gt;subject&lt;/em&gt;’s block is evaluated in line 7, not in line 3.&lt;/p&gt;
 
 &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
 2
@@ -280,9 +288,9 @@ We can describe how to build &lt;em&gt;subject&lt;/em&gt; in line 3 before decla
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;p&gt;When we would like to test more methods, we would have to create more &lt;em&gt;describe&lt;/em&gt; blocks.
-Then I’d suggest extracting the knowledge about how to initialize tested class to a &lt;em&gt;let&lt;/em&gt; block at the top and reuse
-it in &lt;em&gt;subject&lt;/em&gt; declarations.&lt;/p&gt;
+&lt;p&gt;If we wanted to test more methods, we would have to create more &lt;em&gt;describe&lt;/em&gt; blocks.
+In this case I would suggest extracting the knowledge about how to initialize tested class to a &lt;em&gt;let&lt;/em&gt; block at the top.
+After that - reuse it in &lt;em&gt;subject&lt;/em&gt; declarations.&lt;/p&gt;
 
 &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
 2
@@ -316,18 +324,22 @@ it in &lt;em&gt;subject&lt;/em&gt; declarations.&lt;/p&gt;
 
 &lt;p&gt;For the same reasons as in previous step.&lt;/p&gt;
 
-&lt;p&gt;I mean instead of duplicating &lt;code class=&quot;highlighter-rouge&quot;&gt;subject.call(argument)&lt;/code&gt; in each expectation, we can move calling this method into the
-&lt;em&gt;subject&lt;/em&gt;, because it’s the same in each case (line 5 in below &lt;em&gt;final&lt;/em&gt; listing).&lt;/p&gt;
+&lt;p&gt;Instead of duplicating &lt;code class=&quot;highlighter-rouge&quot;&gt;subject.call(argument)&lt;/code&gt; in each expectation, it could be moved into the
+&lt;em&gt;subject&lt;/em&gt;, because it’s the same in each case (line 5 in below listing).&lt;/p&gt;
 
 &lt;h3 id=&quot;final-version&quot;&gt;Final version&lt;/h3&gt;
 
 &lt;ul&gt;
   &lt;li&gt;Tested class name is used once (line: 1 - &lt;a href=&quot;https://relishapp.com/rspec/rspec-core/docs/metadata/described-class&quot;&gt;described_class&lt;/a&gt;).&lt;/li&gt;
-  &lt;li&gt;Knowledge how to instantialize tested class is in one place (line: 2).&lt;/li&gt;
-  &lt;li&gt;Knowledge how to call tested method is in one place, following its &lt;em&gt;describe&lt;/em&gt; block (line: 5).&lt;/li&gt;
+  &lt;li&gt;Knowledge &lt;em&gt;how to instantiate&lt;/em&gt; tested class is kept in one place (line: 2).&lt;/li&gt;
+  &lt;li&gt;Knowledge &lt;em&gt;how to call tested method&lt;/em&gt; is kept in one place, following it’s &lt;em&gt;describe&lt;/em&gt; block (line: 5).&lt;/li&gt;
   &lt;li&gt;&lt;em&gt;let&lt;/em&gt; blocks are declared within their &lt;em&gt;contexts&lt;/em&gt; (lines: &lt;code class=&quot;highlighter-rouge&quot;&gt;8 and 22&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;11 and 16&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;25 and 30&lt;/code&gt;).&lt;/li&gt;
-  &lt;li&gt;Read it from top to bottom and you will see a structure &lt;strong&gt;descending from general to detailed&lt;/strong&gt;.&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;p&gt;As a result of eliminating these duplications, specs became also more readable.
+When looking at the nesting levels, we can see a kind of &lt;strong&gt;descending from general to detailed&lt;/strong&gt; structure.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;The general things are declared higher, closer to the top and the context-related details are nested deeper.&lt;/strong&gt;&lt;/p&gt;
 
 &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
 2
@@ -403,8 +415,6 @@ it in &lt;em&gt;subject&lt;/em&gt; declarations.&lt;/p&gt;
 &lt;/div&gt;
 
 &lt;p&gt;Practice writing DRY specs. This habit pays of.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Removing duplication from testing lowers the cost of changing them in reaction to application changes(..)&lt;/em&gt;&lt;a href=&quot;#1&quot;&gt;[1]&lt;/a&gt;&lt;/p&gt;
 
 &lt;h4 id=&quot;more-reading&quot;&gt;More reading&lt;/h4&gt;
 

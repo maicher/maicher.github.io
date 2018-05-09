@@ -79,7 +79,13 @@
 <h3 id="why">Why?</h3>
 
 <p>Tests are software, so design concepts apply to them as well.
-One of the keys is to keep them <a rel="nofollow" target="_blank" href="http://wiki.c2.com/?DontRepeatYourself">DRY</a>.</p>
+One of the key things is to keep them <a rel="nofollow" target="_blank" href="http://wiki.c2.com/?DontRepeatYourself">DRY</a>.</p>
+
+<p>In a words of Sandi Metz from <em>Practical Object-Oriented Design in Ruby</em>:</p>
+
+<blockquote>
+  <p><em>Removing duplication from testing lowers the cost of changing them in reaction to application changes(..)</em><a href="#1">[1]</a></p>
+</blockquote>
 
 <h3 id="use-case">Use case</h3>
 
@@ -106,14 +112,14 @@ One of the keys is to keep them <a rel="nofollow" target="_blank" href="http://w
 </div>
 </div>
 
-<p>A class with one depencency, that responds to one method which takes one argument.</p>
+<p>A class with one dependency that responds to one method which takes one argument.</p>
 
 <p>For simplicity, lets assume that <code class="highlighter-rouge">#call</code> is a <a rel="nofollow" target="_blank" href="https://martinfowler.com/bliki/CommandQuerySeparation.html">query method</a>,
 which can be tested by asserting a return value.</p>
 
 <h3 id="specs">SPECS</h3>
 
-<p>What I observe, developers tend to write specs in a structure more or less like:</p>
+<p>What I’ve observed, developers tend to write specs structured more or less like:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
 2
@@ -186,35 +192,36 @@ which can be tested by asserting a return value.</p>
 </div>
 </div>
 
-<p>Different contexts are covered. Subjects are described.
-I believe that by looking on it you can tell what is going on there.</p>
+<p>In above specs, different contexts are covered and subjects are described.
+I believe that by looking at it you can tell what is going on there.</p>
 
-<p>However there are some <strong>repetitions</strong> which violates DRY principle:</p>
+<p>However, there are some <strong>repetitions</strong> which violate DRY principle:</p>
 
 <ul>
   <li>Tested class name <code class="highlighter-rouge">Foo</code> is used few times (in lines: 1, 9, 15, 23, 29).</li>
-  <li>Knowledge about how to instantialize tested class is duplicated in each example (lines: 9, 15, 23, 29).</li>
-  <li>Knowledge about how to call tested method is duplicated as well (lines: 10, 16, 24, 30).</li>
+  <li>Knowledge about <em>how to instantiate</em> tested class is duplicated in each example (lines: 9, 15, 23, 29).</li>
+  <li>Knowledge about <em>how to call tested method</em> is duplicated as well (lines: 10, 16, 24, 30).</li>
 </ul>
 
-<p>In other words, if one of the followings change:</p>
+<p>Therefore, if one of the followings change:</p>
 <ul>
   <li>class name,</li>
-  <li>way of initializing (more/less dependency),</li>
+  <li>way of initializing (more/less injected dependencies),</li>
   <li>method name,</li>
   <li>arguments number.</li>
 </ul>
 
-<p>..if one of the above change, 4-5 lines would have to be changed to keep the tests up to date.</p>
+<p>..if one of above change in code, then 4-5 specs lines need to be adjusted keep the tests up to date.</p>
 
-<p>It’s not <em>that</em> problematic, but still, improving makes sense.</p>
+<p>It’s not <em>that</em> problematic, but still, improving it makes sense.</p>
 
 <h3 id="refactor-step-1---move-lets-into-their-contexts">Refactor #step 1 - move <em>lets</em> into their <em>contexts</em></h3>
 
 <p>Because declaring them on the top makes an impression that two dependencies need’s to be initialized in order to run the specs.
 Which is not true - only one dependency is needed. There are two of them, because of two <em>contexts</em>.
-So moving them into their <em>contexts</em> makes it easier to follow.
-<em>Contexts</em> descriptions is making it clear how they vary between each other and the fact
+So moving them into their <em>contexts</em> makes it easier to follow.</p>
+
+<p><em>Contexts</em> descriptions is making it clear how they vary between each other and the fact
 that they have the same names makes it easier to understand that they represent the same being (lines: 4, 20)</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
@@ -286,9 +293,10 @@ that they have the same names makes it easier to understand that they represent 
 
 <p>Because this knowledge is common for all examples.</p>
 
-<p>In different <em>contexts</em> different dependencies are used to instantialize tested class. They can be declared after declaring the <em>subject</em>.
-We can describe how to build <em>subject</em> in line 3 before declaring it’s dependency (line 6), because of <em>subjest</em>’s lazy evaluation
-(it’s evaluated in line 7, not 3).</p>
+<p>In different <em>contexts</em>, different dependencies are used to instantiate tested class.
+These dependencies can be declared later (in line 6), in their contexts, after <em>subject</em> declaration (line 3).</p>
+
+<p>It works because of <em>subject</em>’s lazy evaluation - code in <em>subject</em>’s block is evaluated in line 7, not in line 3.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
 2
@@ -317,9 +325,9 @@ We can describe how to build <em>subject</em> in line 3 before declaring it’s 
 </div>
 </div>
 
-<p>When we would like to test more methods, we would have to create more <em>describe</em> blocks.
-Then I’d suggest extracting the knowledge about how to initialize tested class to a <em>let</em> block at the top and reuse
-it in <em>subject</em> declarations.</p>
+<p>If we wanted to test more methods, we would have to create more <em>describe</em> blocks.
+In this case I would suggest extracting the knowledge about how to initialize tested class to a <em>let</em> block at the top.
+After that - reuse it in <em>subject</em> declarations.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
 2
@@ -353,18 +361,22 @@ it in <em>subject</em> declarations.</p>
 
 <p>For the same reasons as in previous step.</p>
 
-<p>I mean instead of duplicating <code class="highlighter-rouge">subject.call(argument)</code> in each expectation, we can move calling this method into the
-<em>subject</em>, because it’s the same in each case (line 5 in below <em>final</em> listing).</p>
+<p>Instead of duplicating <code class="highlighter-rouge">subject.call(argument)</code> in each expectation, it could be moved into the
+<em>subject</em>, because it’s the same in each case (line 5 in below listing).</p>
 
 <h3 id="final-version">Final version</h3>
 
 <ul>
   <li>Tested class name is used once (line: 1 - <a rel="nofollow" target="_blank" href="https://relishapp.com/rspec/rspec-core/docs/metadata/described-class">described_class</a>).</li>
-  <li>Knowledge how to instantialize tested class is in one place (line: 2).</li>
-  <li>Knowledge how to call tested method is in one place, following its <em>describe</em> block (line: 5).</li>
+  <li>Knowledge <em>how to instantiate</em> tested class is kept in one place (line: 2).</li>
+  <li>Knowledge <em>how to call tested method</em> is kept in one place, following it’s <em>describe</em> block (line: 5).</li>
   <li><em>let</em> blocks are declared within their <em>contexts</em> (lines: <code class="highlighter-rouge">8 and 22</code>, <code class="highlighter-rouge">11 and 16</code>, <code class="highlighter-rouge">25 and 30</code>).</li>
-  <li>Read it from top to bottom and you will see a structure <strong>descending from general to detailed</strong>.</li>
 </ul>
+
+<p>As a result of eliminating these duplications, specs became also more readable.
+When looking at the nesting levels, we can see a kind of <strong>descending from general to detailed</strong> structure.</p>
+
+<p><strong>The general things are declared higher, closer to the top and the context-related details are nested deeper.</strong></p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
 2
@@ -440,8 +452,6 @@ it in <em>subject</em> declarations.</p>
 </div>
 
 <p>Practice writing DRY specs. This habit pays of.</p>
-
-<p><em>Removing duplication from testing lowers the cost of changing them in reaction to application changes(..)</em><a href="#1">[1]</a></p>
 
 <h4 id="more-reading">More reading</h4>
 
