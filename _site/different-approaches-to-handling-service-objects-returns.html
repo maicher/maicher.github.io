@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
-
   <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Animated Spinner for Ruby Command Line</title>
-  <meta name="description" content="Introduction">
+  <title>4 approaches to handling service objects' returns</title>
+  <meta name="description" content="Around 2 months ago Wimdu (a project where I was involved for around 2 years) was closed due to business reasons.Before my software house transferred me to a...">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://localhost:4000/animated-spinner-for-ruby-command-line.html">
+  <link rel="canonical" href="http://localhost:4000/different-approaches-to-handling-service-objects-returns.html">
   <link rel="alternate" type="application/rss+xml" title="Krzysztof Maicher" href="http://localhost:4000/feed.xml" />
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <script>
@@ -24,15 +23,10 @@
   </script>
 </head>
 
-
   <body>
-
     <header class="site-header">
-
   <div class="wrapper">
-
     <a class="site-title" href="/"><img src="http://0.gravatar.com/avatar/223ba397b1fef4a7bec7bfc59ca74f11"/> Krzysztof Maicher</a>
-
     <nav class="site-nav">
       <a href="#" class="menu-icon">
         <svg viewBox="0 0 18 15">
@@ -41,8 +35,9 @@
           <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
-
       <div class="trigger">
+        
+          
         
           
         
@@ -56,93 +51,30 @@
         
       </div>
     </nav>
-
   </div>
-
 </header>
-
 
     <div class="page-content">
       <div class="wrapper">
         <div class="post">
-
   <header class="post-header">
-    <h1 class="post-title">Animated Spinner for Ruby Command Line</h1>
-    <p class="post-meta">Nov 23, 2016 • Krzysztof Maicher • <i>ruby rubygems </i></p>
+    <h1 class="post-title">4 approaches to handling service objects' returns</h1>
+    <p class="post-meta">2018.11.24 • Krzysztof Maicher • <i>ruby service objects oop fp software development </i></p>
   </header>
-
   <article class="post-content">
-    <h2 id="introduction">Introduction</h2>
+    <p>Around 2 months ago Wimdu (a project where I was involved for around 2 years) was closed due to business reasons.
+Before my software house transferred me to another project, I had some slack time, which I spent on writing a post.</p>
 
-<p>I wrote <a rel="nofollow" target="_blank" href="https://github.com/maicher/cli_spinnable">a gem</a> that enriches Ruby CLI by spinner.</p>
+<p>You can read it here: <a rel="nofollow" target="_blank" href="https://themasters.io/blog/posts/approaches-to-handling-service-objects-returns">https://themasters.io/blog/posts/approaches-to-handling-service-objects-returns</a></p>
 
-<h2 id="why">Why?</h2>
-
-<p>Because existing solutions did not fit my use case.</p>
-
-<p>I needed:</p>
-
-<ul>
-  <li>spinner</li>
-  <li>tick mark (✓)</li>
-  <li>fail mark (×)</li>
-</ul>
-
-<h2 id="use-case">Use case</h2>
-
-<p>I was building a CLI script in Ruby, that downloads some data and then processes it.</p>
-
-<p>There were few steps, each took few seconds to execute and could either fail or succeed.
-I wanted to be able to mark them with a:</p>
-
-<ul>
-  <li>success mark (✓) when step succeed,</li>
-  <li>or fail mark (×) followed by error message when step failed.</li>
-</ul>
-
-<h2 id="how">How?</h2>
-
-<p>It’s written in pure Ruby, using:</p>
-
-<ul>
-  <li>asynchronous writing to <code class="highlighter-rouge">STDOUT</code> using <code class="highlighter-rouge">Thread</code> and <code class="highlighter-rouge">Queue</code></li>
-  <li><code class="highlighter-rouge">Refine</code>/<code class="highlighter-rouge">Using</code> applied on <code class="highlighter-rouge">String</code> for adding colors to outputted text</li>
-  <li><code class="highlighter-rouge">Enumerable#cycle</code> for infinitive spinner rotation</li>
-  <li>rspec tests</li>
-</ul>
-
-<h2 id="how-to-use">How to use?</h2>
-
-<p><strong>CliSpinnable</strong> gem doesn’t require any configuration.
-It makes it easy to use, but in the same time it’s not very flexible and it will suit only specific use cases, such as described above.</p>
-
-<p>It’s main feature is <code class="highlighter-rouge">CliSpinnable.with_spinner</code> method.</p>
-
-<p>Call it with the block and then use <code class="highlighter-rouge">#print</code>, <code class="highlighter-rouge">#tick</code> and <code class="highlighter-rouge">#fail</code> methods:</p>
-
-<script src="https://gist.github.com/maicher/eec6436a5e171e91108304736f943642.js"> </script>
-
-<p>Can also be mixed-in to the class:</p>
-
-<script src="https://gist.github.com/maicher/c5e09d6b088276a701fed47d0ca7fecd.js"> </script>
-
-<h2 id="demo">Demo</h2>
-
-<script src="https://gist.github.com/maicher/405a10faebfe31f9f2225805d15dc3f7.js"> </script>
-
-<p><strong>Output:</strong></p>
-
-<p><img src="https://raw.githubusercontent.com/maicher/cli_spinnable/master/examples/demo.gif" alt="demo.git" /></p>
-
-<p>You can check out more examples <a rel="nofollow" target="_blank" href="https://github.com/maicher/cli_spinnable/tree/master/examples">here</a>.</p>
+<p>After I published it on Reddit, different devs shared their ideas on the topic, so the Reddit thread it’s also worth checking: <a rel="nofollow" target="_blank" href="https://www.reddit.com/r/ruby/comments/9znqyg/4_approaches_to_handling_service_objects_returns/">https://www.reddit.com/r/ruby/comments/9znqyg/4_approaches_to_handling_service_objects_returns/</a></p>
 
   </article>
-
   
 <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'maichergithubio';
-    var disqus_identifier = '/animated-spinner-for-ruby-command-line';
+    var disqus_identifier = '/different-approaches-to-handling-service-objects-returns';
 
     //Below here is identical to what Disqus supply as universal code.
     /* * * DON'T EDIT BELOW THIS LINE * * */
@@ -160,11 +92,8 @@ It makes it easy to use, but in the same time it’s not very flexible and it wi
 
       </div>
     </div>
-
     <footer class="site-footer">
-
   <div class="wrapper">
-
     <div class="footer-col-wrapper">
       <div class="footer-col  footer-col-1">
         <ul class="contact-list">
@@ -172,7 +101,6 @@ It makes it easy to use, but in the same time it’s not very flexible and it wi
           <li><a href="mailto:krzysztof.maicher@gmail.com">krzysztof.maicher@gmail.com</a></li>
         </ul>
       </div>
-
       <div class="footer-col  footer-col-2">
         <ul class="social-media-list">
             
@@ -212,17 +140,12 @@ It makes it easy to use, but in the same time it’s not very flexible and it wi
             
         </ul>
       </div>
-
       <div class="footer-col  footer-col-3">
         <p class="text"></p>
       </div>
     </div>
-
   </div>
-
 </footer>
 
-
   </body>
-
 </html>
