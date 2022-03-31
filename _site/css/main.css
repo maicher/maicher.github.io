@@ -5,7 +5,7 @@ body, h1, h2, h3, h4, h5, h6, p, blockquote, pre, hr, dl, dd, ol, ul, figure { m
 body { font-family: lato, Arial, sans-serif; font-size: 18px; line-height: 1.5; font-weight: 300; color: #343434; background-color: #fdfdfd; -webkit-text-size-adjust: 100%; }
 
 /** Set `margin-bottom` to maintain vertical rhythm */
-h1, h2, h3, h4, h5, h6, p, blockquote, pre, ul, ol, dl, figure, .highlight { margin-bottom: 15px; }
+h1, h2, h3, h4, h5, h6, p, blockquote, ul, ol, dl, figure, .highlight { margin-bottom: 15px; }
 
 /** Images */
 img { max-width: 100%; vertical-align: middle; }
@@ -35,14 +35,15 @@ blockquote { color: #828282; border-left: 4px solid #e8e8e8; padding-left: 15px;
 blockquote > :last-child { margin-bottom: 0; }
 
 /** Code formatting */
-pre, code { border-radius: 3px; padding: 1px 5px; background-color: white; font-size: 13px; }
-pre pre, code pre { font-size: 13px; }
+code { border-radius: 3px; padding: 1px 5px; background-color: white; font-size: 13px; }
+code pre { font-size: 13px; }
+
+pre { background-color: white; }
 
 .lineno { border: 0; padding: 2px; color: #ccc; font-size: 13px; background: none; text-align: right; }
 
 table tr td.gl { width: 32px; padding: 0; }
 
-pre { padding: 8px 12px; overflow-x: scroll; }
 pre > code { border: 0; padding-right: 0; padding-left: 0; }
 
 /** Wrapper */
@@ -56,14 +57,12 @@ pre > code { border: 0; padding-right: 0; padding-left: 0; }
 .icon > svg { display: inline-block; width: 16px; height: 16px; vertical-align: middle; }
 .icon > svg path { fill: #828282; }
 
-.highlight { background-color: #fdfdfd !important; margin-left: -34px; border: 0; }
+.highlight { background-color: #fdfdfd !important; border: 0; }
 .highlight table { width: 100%; }
 
-table { padding: 10px; background: #f3f3f3; }
+table { border-collapse: collapse; }
 
-table th { border-bottom: #ddd solid 1px; }
-
-table td, table th { padding: 5px 10px; }
+table td, table th { padding: 5px 10px; border: 1px solid #ddd; }
 
 .lineo { text-align: right; }
 

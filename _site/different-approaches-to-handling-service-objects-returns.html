@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>4 approaches to handling service objects' returns</title>
-  <meta name="description" content="Around 2 months ago Wimdu (a project where I was involved for around 2 years) was closed due to business reasons.Before my software house transferred me to a...">
+  <meta name="description" content="There is this one common problem with Rails applications - over time ActiveRecord models become too big and too hard to maintain. It happens because they ten...">
 
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://localhost:4000/different-approaches-to-handling-service-objects-returns.html">
@@ -59,13 +59,106 @@
         <div class="post">
   <header class="post-header">
     <h1 class="post-title">4 approaches to handling service objects' returns</h1>
-    <p class="post-meta">2018.11.24 • Krzysztof Maicher • <i>ruby service objects oop fp software development </i></p>
+    <p class="post-meta">2018.11.24 • Krzysztof Maicher • <i>ruby software development </i></p>
   </header>
   <article class="post-content">
-    <p>Around 2 months ago Wimdu (a project where I was involved for around 2 years) was closed due to business reasons.
-Before my software house transferred me to another project, I had some slack time, which I spent on writing a post.</p>
+    <p>There is this one common problem with Rails applications - over time <em>ActiveRecord models</em> become too big and too hard to maintain. It happens because they tend to have too many responsibilities. To avoid overloading <em>ActiveRecord models</em> there is <a rel="nofollow" target="_blank" href="https://codeclimate.com/blog/7-ways-to-decompose-fat-activerecord-models/">a guideline</a> to extract some of the logic to service objects.</p>
 
-<p>You can read it here: <a rel="nofollow" target="_blank" href="https://themasters.io/blog/posts/approaches-to-handling-service-objects-returns">https://themasters.io/blog/posts/approaches-to-handling-service-objects-returns</a></p>
+<p><em>Service objects</em> form a layer between <em>controllers</em> and <em>ActiveRecord models</em>, where a certain portion of business logic is places. This approach helps to keep the <em>controller</em> slim and prevents <em>ActiveRecord models</em> from becoming too fat.</p>
+
+<div style="width:100%;text-align:center;margin-bottom:40px">
+    <img style="max-width: 100%" src="/assets/controller_calls_service.png" alt="Controller calls service" />
+    <br />
+    <caption align="bottom">Controller calls service</caption>
+</div>
+
+<p><em>Controller</em> calls a <em>service</em> to perform a certain <em>use case</em>.
+The <em>service</em>, in turn, interacts with necessary objects (eg. <em>ActiveRecord models</em>) to perform the requested operation, mutating some part of the system’s state.
+Afterwards, the <strong><em>service</em> returns the control back to the <em>controller</em></strong>&gt;.</p>
+
+<p>I’d like to concentrate on the last step here. What are the possibilities of returning the control from the <em>service object</em> back to the <em>controller</em>?</p>
+
+<p>In my development career I have come across various ways of implementing it and here, I’d like to present a few of them. The use case processing can go in the direction of a <a rel="nofollow" target="_blank" href="https://en.wikipedia.org/wiki/Happy_path">happy path</a> or a <strong>&gt;sad (exceptional/failure) path</strong>&gt;, but the service not only needs to return information if the operation succeeds or fails. Usually additional data needs to be passed as well, so that the controller can handle the response (display a customized message, errors, etc).</p>
+
+<p><em>All the below examples show the controller calling a service object, but the caller can be anything - a rake task, a background job, a cli, another service, etc.</em></p>
+
+<h3 id="handle-the-sad-path-by-raising-and-rescuing-exceptions">Handle the sad path by raising and rescuing exceptions</h3>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_1.rb"></script>
+
+<p><code>CreateUser</code> service handles the use case of creating a user in an application.</p>
+
+<p>The controller prepares params and calls the service. Then, processing can go in one of two directions. If everything goes fine - the happy path - the service returns a user object which is used in the controller to display a success message. However, if the operation doesn’t succeed - the sad path, things are handled differently. The service raises a custom defined exception and the controller, in turn, rescues this specific exception and displays a failure message.</p>
+
+<p>It’s a normal and expected behaviour that sometimes a service doesn’t process the operation - it can happen e.g. due to invalid params, lack of permissions, etc. There are <a rel="nofollow" target="_blank" href="http://wiki.c2.com/?DesigningWithExceptions">opinions</a> that those exceptions should not be used in such cases.</p>
+
+<p>For some developers, it’s an antipattern and for others, it’s not. Still, it requires a certain dose of discipline to use it correctly. You need to remember to rescue the specific exception properly, not to let it propagate up the call stack. This problem is often visible in Rails, where it is tempting to rely on already-existing <em>ActiveRecord</em> exceptions:</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_1.rb"></script>
+
+<p>This code smells because one of the purposes of the <code>CreateUser</code> service is to encapsulate some implementation details inside it - eg. interactions with <em>ActiveRecord</em>. Here, however, the <em>ActiveRecord</em>’s exception class leaks up to the controller, breaking through 2 layers of abstraction.</p>
+
+<div style="width:100%;text-align:center;margin-bottom:40px">
+    <img style="max-width: 100%" src="/assets/controller_rescues_exception.png" alt="Controller rescues exception" />
+    <br />
+    <caption align="bottom">Controller rescues exception</caption>
+</div>
+
+<p>These and a few <a rel="nofollow" target="_blank" href="https://stackoverflow.com/questions/729379/why-not-use-exceptions-as-regular-flow-of-control">other</a> <a rel="nofollow" target="_blank" href="http://wiki.c2.com/?DontUseExceptionsForFlowControl">reasons</a> speak against the idea of using exceptions for the sad path. There are better ways to do it. However, the next idea is not one of them yet.</p>
+
+<h3 id="a-service-returns-a-boolean">A service returns a <em>boolean</em></h3>
+
+<p>Conditional logic is often used to distinguish between success and failure. Conditionals are free from previously described problems and evaluating them is faster than rescuing exceptions in Ruby.</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_3.rb"></script>
+
+<p>The <em>controller</em> calls the <em>service</em> and then evaluates conditional logic. The success path is evaluated when the service returned true, otherwise, it takes the failure path. The problem is that it doesn’t scale. If we wanted to handle both paths in a slightly more sophisticated way, we would need to query the service object for additional data.</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_4.rb"></script>
+
+<p>Now, the service has 3 public methods. Not only the main <code>#call</code> method, which performs the actual operation, but also readers: <code>#user</code> and <code>#error_message</code>. Because the <code>#call</code> method most probably mutates the state of the system, reader methods probably return different values depending on the fact if invoked before or after <code>#call</code>. It can get complicated if they rely on data which is memorized in service’s instance variables. We need to be careful defining these readers and watch out if something doesn’t get memorized in the wrong moment. If it does, readers can return outdated values (memoized before the mutation - <code>#call</code> - happened). So this solution is fragile, there can be situations where it works only if the methods are called in the correct order.</p>
+
+<p>The problem here is that once instantiated, the service object has 2 responsibilities - executing the operation and data containing. The above problems go away if we split these two responsibilities apart.</p>
+
+<h3 id="class-level-method-and-read-only-result-object">Class level method and read-only result object</h3>
+
+<p>This pattern solves the above problems by providing a separation implemented through a class level method. The operation execution is invoked by calling the class level method. The data is then accessed by readers exposed on the instance of this class.</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_5.rb"></script>
+
+<p>Class level <code>.call</code> method is defined. Its responsibility is to construct the service object and then execute the operation by calling the <code>#call</code> instance method. So that the controller doesn’t have access to reader methods before the operation is executed.</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_6.rb"></script>
+
+<p>The problem is that the controller can still access the instance <code>#call</code> method after the operation was performed. The access to the constructor is also not restricted. So along with this implementation, two convention guidelines need to be introduced. First - not to use the call method on the instantiated object. Second - not to use the constructor (use the class level <em>#call</em> method instead).</p>
+
+<p><a rel="nofollow" target="_blank" href="https://github.com/AaronLasseigne/active_interaction">ActiveInteraction</a> gem provides a DLS which helps to build service objects using the above pattern - fixing these issues.</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_7.rb"></script>
+
+<p>I’ve been using this pattern for some time. This solution is not ideal though. It comes with a cost of hijacking the constructor. Without the constructor, it’s hard to inject dependencies - collaborators’ objects. So they tend to be hardcoded inside the service definition. Still, we can achieve a dependency injection by passing the collaborators along with the <em>params</em>, however, in my opinion, it’s not an appropriate thing to do - it feels hacky.</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_8.rb"></script>
+
+<h3 id="service-returns-a-success-or-a-failure-value-object">Service returns a success or a failure value object</h3>
+
+<p>In this solution, we let the service be a regular object, with access to the constructor. We also define two value objects - a <code>Success</code> and a <code>Failure</code>.</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_9.rb"></script>
+
+<p>In the above example, I’m subclassing the <code>Hash</code> class to define the result value objects, but they can be a PORO (Plain Old Ruby Object) as well. The service returns one of these objects and the controller processes happy or sad paths, based on the type of the returned object.</p>
+
+<p>If we made a decision to use this approach widely across the project, <code>Success</code> and <code>Failure</code> objects could be general purpose ones. There are <a rel="nofollow" target="_blank" href="https://dry-rb.org">libraries</a> that take this idea even further - the service can <code>yield</code> the result objects to the block and then <strong>&gt;evaluate pattern matching</strong>&gt; (a concept from functional programming) so that no conditionals are used to distinguish the paths. If the service returns <code>Success</code>, success block is evaluated. If the service returns <code>Failure</code> - failure block:</p>
+
+<script src="https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_10.rb"></script>
+
+<p>Result objects also have a <code>#bind</code> method by which a result object can be chained with another service (or any block of code) in a way that if the first service returns Success, the next service is called. If any service returns <code>Failure</code> - the whole sequence stops executing. This concept is also taken from functional programming and it’s called a <strong>monad</strong>.</p>
+
+<p>Monads chained together form a pattern called <a rel="nofollow" target="_blank" href="https://fsharpforfunandprofit.com/rop/">Railway Oriented Programming</a>. Dry-rb libraries (dry-monads, dry-transaction) allow implementing this pattern in Ruby.</p>
+
+<p>We’ve used dry-transaction it one of our clients’ projects within a legacy Rails application to build new features. Services objects implemented using dry-transaction (with help of dry-validation) replaced <em>ActiveInteractors</em>. I found them particularly elegant and flexible.</p>
+
+<hr />
 
 <p>After I published it on Reddit, different devs shared their ideas on the topic, so the Reddit thread it’s also worth checking: <a rel="nofollow" target="_blank" href="https://www.reddit.com/r/ruby/comments/9znqyg/4_approaches_to_handling_service_objects_returns/">https://www.reddit.com/r/ruby/comments/9znqyg/4_approaches_to_handling_service_objects_returns/</a></p>
 

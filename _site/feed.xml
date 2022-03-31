@@ -5,16 +5,109 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 24 Nov 2018 13:25:55 +0100</pubDate>
-    <lastBuildDate>Sat, 24 Nov 2018 13:25:55 +0100</lastBuildDate>
+    <pubDate>Thu, 31 Mar 2022 06:05:00 +0200</pubDate>
+    <lastBuildDate>Thu, 31 Mar 2022 06:05:00 +0200</lastBuildDate>
     <generator>Jekyll v3.7.4</generator>
     
       <item>
         <title>4 approaches to handling service objects' returns</title>
-        <description>&lt;p&gt;Around 2 months ago Wimdu (a project where I was involved for around 2 years) was closed due to business reasons.
-Before my software house transferred me to another project, I had some slack time, which I spent on writing a post.&lt;/p&gt;
+        <description>&lt;p&gt;There is this one common problem with Rails applications - over time &lt;em&gt;ActiveRecord models&lt;/em&gt; become too big and too hard to maintain. It happens because they tend to have too many responsibilities. To avoid overloading &lt;em&gt;ActiveRecord models&lt;/em&gt; there is &lt;a href=&quot;https://codeclimate.com/blog/7-ways-to-decompose-fat-activerecord-models/&quot;&gt;a guideline&lt;/a&gt; to extract some of the logic to service objects.&lt;/p&gt;
 
-&lt;p&gt;You can read it here: &lt;a href=&quot;https://themasters.io/blog/posts/approaches-to-handling-service-objects-returns&quot;&gt;https://themasters.io/blog/posts/approaches-to-handling-service-objects-returns&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Service objects&lt;/em&gt; form a layer between &lt;em&gt;controllers&lt;/em&gt; and &lt;em&gt;ActiveRecord models&lt;/em&gt;, where a certain portion of business logic is places. This approach helps to keep the &lt;em&gt;controller&lt;/em&gt; slim and prevents &lt;em&gt;ActiveRecord models&lt;/em&gt; from becoming too fat.&lt;/p&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;img style=&quot;max-width: 100%&quot; src=&quot;/assets/controller_calls_service.png&quot; alt=&quot;Controller calls service&quot; /&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Controller calls service&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Controller&lt;/em&gt; calls a &lt;em&gt;service&lt;/em&gt; to perform a certain &lt;em&gt;use case&lt;/em&gt;.
+The &lt;em&gt;service&lt;/em&gt;, in turn, interacts with necessary objects (eg. &lt;em&gt;ActiveRecord models&lt;/em&gt;) to perform the requested operation, mutating some part of the system’s state.
+Afterwards, the &lt;strong&gt;&lt;em&gt;service&lt;/em&gt; returns the control back to the &lt;em&gt;controller&lt;/em&gt;&lt;/strong&gt;&amp;gt;.&lt;/p&gt;
+
+&lt;p&gt;I’d like to concentrate on the last step here. What are the possibilities of returning the control from the &lt;em&gt;service object&lt;/em&gt; back to the &lt;em&gt;controller&lt;/em&gt;?&lt;/p&gt;
+
+&lt;p&gt;In my development career I have come across various ways of implementing it and here, I’d like to present a few of them. The use case processing can go in the direction of a &lt;a href=&quot;https://en.wikipedia.org/wiki/Happy_path&quot;&gt;happy path&lt;/a&gt; or a &lt;strong&gt;&amp;gt;sad (exceptional/failure) path&lt;/strong&gt;&amp;gt;, but the service not only needs to return information if the operation succeeds or fails. Usually additional data needs to be passed as well, so that the controller can handle the response (display a customized message, errors, etc).&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;All the below examples show the controller calling a service object, but the caller can be anything - a rake task, a background job, a cli, another service, etc.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;handle-the-sad-path-by-raising-and-rescuing-exceptions&quot;&gt;Handle the sad path by raising and rescuing exceptions&lt;/h3&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_1.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;code&gt;CreateUser&lt;/code&gt; service handles the use case of creating a user in an application.&lt;/p&gt;
+
+&lt;p&gt;The controller prepares params and calls the service. Then, processing can go in one of two directions. If everything goes fine - the happy path - the service returns a user object which is used in the controller to display a success message. However, if the operation doesn’t succeed - the sad path, things are handled differently. The service raises a custom defined exception and the controller, in turn, rescues this specific exception and displays a failure message.&lt;/p&gt;
+
+&lt;p&gt;It’s a normal and expected behaviour that sometimes a service doesn’t process the operation - it can happen e.g. due to invalid params, lack of permissions, etc. There are &lt;a href=&quot;http://wiki.c2.com/?DesigningWithExceptions&quot;&gt;opinions&lt;/a&gt; that those exceptions should not be used in such cases.&lt;/p&gt;
+
+&lt;p&gt;For some developers, it’s an antipattern and for others, it’s not. Still, it requires a certain dose of discipline to use it correctly. You need to remember to rescue the specific exception properly, not to let it propagate up the call stack. This problem is often visible in Rails, where it is tempting to rely on already-existing &lt;em&gt;ActiveRecord&lt;/em&gt; exceptions:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_1.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;This code smells because one of the purposes of the &lt;code&gt;CreateUser&lt;/code&gt; service is to encapsulate some implementation details inside it - eg. interactions with &lt;em&gt;ActiveRecord&lt;/em&gt;. Here, however, the &lt;em&gt;ActiveRecord&lt;/em&gt;’s exception class leaks up to the controller, breaking through 2 layers of abstraction.&lt;/p&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;img style=&quot;max-width: 100%&quot; src=&quot;/assets/controller_rescues_exception.png&quot; alt=&quot;Controller rescues exception&quot; /&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Controller rescues exception&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;p&gt;These and a few &lt;a href=&quot;https://stackoverflow.com/questions/729379/why-not-use-exceptions-as-regular-flow-of-control&quot;&gt;other&lt;/a&gt; &lt;a href=&quot;http://wiki.c2.com/?DontUseExceptionsForFlowControl&quot;&gt;reasons&lt;/a&gt; speak against the idea of using exceptions for the sad path. There are better ways to do it. However, the next idea is not one of them yet.&lt;/p&gt;
+
+&lt;h3 id=&quot;a-service-returns-a-boolean&quot;&gt;A service returns a &lt;em&gt;boolean&lt;/em&gt;&lt;/h3&gt;
+
+&lt;p&gt;Conditional logic is often used to distinguish between success and failure. Conditionals are free from previously described problems and evaluating them is faster than rescuing exceptions in Ruby.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_3.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;The &lt;em&gt;controller&lt;/em&gt; calls the &lt;em&gt;service&lt;/em&gt; and then evaluates conditional logic. The success path is evaluated when the service returned true, otherwise, it takes the failure path. The problem is that it doesn’t scale. If we wanted to handle both paths in a slightly more sophisticated way, we would need to query the service object for additional data.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_4.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Now, the service has 3 public methods. Not only the main &lt;code&gt;#call&lt;/code&gt; method, which performs the actual operation, but also readers: &lt;code&gt;#user&lt;/code&gt; and &lt;code&gt;#error_message&lt;/code&gt;. Because the &lt;code&gt;#call&lt;/code&gt; method most probably mutates the state of the system, reader methods probably return different values depending on the fact if invoked before or after &lt;code&gt;#call&lt;/code&gt;. It can get complicated if they rely on data which is memorized in service’s instance variables. We need to be careful defining these readers and watch out if something doesn’t get memorized in the wrong moment. If it does, readers can return outdated values (memoized before the mutation - &lt;code&gt;#call&lt;/code&gt; - happened). So this solution is fragile, there can be situations where it works only if the methods are called in the correct order.&lt;/p&gt;
+
+&lt;p&gt;The problem here is that once instantiated, the service object has 2 responsibilities - executing the operation and data containing. The above problems go away if we split these two responsibilities apart.&lt;/p&gt;
+
+&lt;h3 id=&quot;class-level-method-and-read-only-result-object&quot;&gt;Class level method and read-only result object&lt;/h3&gt;
+
+&lt;p&gt;This pattern solves the above problems by providing a separation implemented through a class level method. The operation execution is invoked by calling the class level method. The data is then accessed by readers exposed on the instance of this class.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_5.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Class level &lt;code&gt;.call&lt;/code&gt; method is defined. Its responsibility is to construct the service object and then execute the operation by calling the &lt;code&gt;#call&lt;/code&gt; instance method. So that the controller doesn’t have access to reader methods before the operation is executed.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_6.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;The problem is that the controller can still access the instance &lt;code&gt;#call&lt;/code&gt; method after the operation was performed. The access to the constructor is also not restricted. So along with this implementation, two convention guidelines need to be introduced. First - not to use the call method on the instantiated object. Second - not to use the constructor (use the class level &lt;em&gt;#call&lt;/em&gt; method instead).&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/AaronLasseigne/active_interaction&quot;&gt;ActiveInteraction&lt;/a&gt; gem provides a DLS which helps to build service objects using the above pattern - fixing these issues.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_7.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;I’ve been using this pattern for some time. This solution is not ideal though. It comes with a cost of hijacking the constructor. Without the constructor, it’s hard to inject dependencies - collaborators’ objects. So they tend to be hardcoded inside the service definition. Still, we can achieve a dependency injection by passing the collaborators along with the &lt;em&gt;params&lt;/em&gt;, however, in my opinion, it’s not an appropriate thing to do - it feels hacky.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_8.rb&quot;&gt;&lt;/script&gt;
+
+&lt;h3 id=&quot;service-returns-a-success-or-a-failure-value-object&quot;&gt;Service returns a success or a failure value object&lt;/h3&gt;
+
+&lt;p&gt;In this solution, we let the service be a regular object, with access to the constructor. We also define two value objects - a &lt;code&gt;Success&lt;/code&gt; and a &lt;code&gt;Failure&lt;/code&gt;.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_9.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;In the above example, I’m subclassing the &lt;code&gt;Hash&lt;/code&gt; class to define the result value objects, but they can be a PORO (Plain Old Ruby Object) as well. The service returns one of these objects and the controller processes happy or sad paths, based on the type of the returned object.&lt;/p&gt;
+
+&lt;p&gt;If we made a decision to use this approach widely across the project, &lt;code&gt;Success&lt;/code&gt; and &lt;code&gt;Failure&lt;/code&gt; objects could be general purpose ones. There are &lt;a href=&quot;https://dry-rb.org&quot;&gt;libraries&lt;/a&gt; that take this idea even further - the service can &lt;code&gt;yield&lt;/code&gt; the result objects to the block and then &lt;strong&gt;&amp;gt;evaluate pattern matching&lt;/strong&gt;&amp;gt; (a concept from functional programming) so that no conditionals are used to distinguish the paths. If the service returns &lt;code&gt;Success&lt;/code&gt;, success block is evaluated. If the service returns &lt;code&gt;Failure&lt;/code&gt; - failure block:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/b132296766ddb97cb3219674830f8b63.js?file=snippet_10.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Result objects also have a &lt;code&gt;#bind&lt;/code&gt; method by which a result object can be chained with another service (or any block of code) in a way that if the first service returns Success, the next service is called. If any service returns &lt;code&gt;Failure&lt;/code&gt; - the whole sequence stops executing. This concept is also taken from functional programming and it’s called a &lt;strong&gt;monad&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Monads chained together form a pattern called &lt;a href=&quot;https://fsharpforfunandprofit.com/rop/&quot;&gt;Railway Oriented Programming&lt;/a&gt;. Dry-rb libraries (dry-monads, dry-transaction) allow implementing this pattern in Ruby.&lt;/p&gt;
+
+&lt;p&gt;We’ve used dry-transaction it one of our clients’ projects within a legacy Rails application to build new features. Services objects implemented using dry-transaction (with help of dry-validation) replaced &lt;em&gt;ActiveInteractors&lt;/em&gt;. I found them particularly elegant and flexible.&lt;/p&gt;
+
+&lt;hr /&gt;
 
 &lt;p&gt;After I published it on Reddit, different devs shared their ideas on the topic, so the Reddit thread it’s also worth checking: &lt;a href=&quot;https://www.reddit.com/r/ruby/comments/9znqyg/4_approaches_to_handling_service_objects_returns/&quot;&gt;https://www.reddit.com/r/ruby/comments/9znqyg/4_approaches_to_handling_service_objects_returns/&lt;/a&gt;&lt;/p&gt;
 </description>
@@ -24,12 +117,6 @@ Before my software house transferred me to another project, I had some slack tim
         
         <category>ruby</category>
         
-        <category>service objects</category>
-        
-        <category>oop</category>
-        
-        <category>fp</category>
-        
         <category>software development</category>
         
         
@@ -37,10 +124,80 @@ Before my software house transferred me to another project, I had some slack tim
     
       <item>
         <title>Sequence diagrams</title>
-        <description>&lt;p&gt;I just wrote an article for the software house where I work. 
-It’s about sequence diagrams. What they are and how to draw the conveniently.&lt;/p&gt;
+        <description>&lt;p&gt;What is the most convenient way of communicating a design idea to another developer? In my opinion - drawing it. However, when you are working remotely it’s not as easy as taking a marker and walking to a whiteboard.&lt;/p&gt;
 
-&lt;p&gt;Check out: &lt;a href=&quot;http://themasters.io/remote-colaboration-using-sequence-diagrams/&quot;&gt;http://themasters.io/remote-colaboration-using-sequence-diagrams&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I was involved in a remote discussion once about redesigning part of an application that the team was working on.
+I found myself struggling to explain my design ideas to the other developers.
+&lt;em&gt;“If only I could just draw it!”&lt;/em&gt; - I thought.
+At that moment I was unprepared and I wasn’t aware of any tool that would let me draw diagrams as easily as on a whiteboard.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-developers-communicate-design-ideas&quot;&gt;How developers communicate design ideas?&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;Sequence diagrams&lt;/strong&gt; are an excellent way to visualize the design ideas. They are described in the Unified Modelling Language (UML) as a group of &lt;a href=&quot;http://wiki.c2.com/?InteractionDiagram&quot;&gt;Interaction Diagrams&lt;/a&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+
+They (sequence diagrams) bring clarity to your (developers) thoughts and provide a vehicle to collaborate and communicate with others. Think of them as a lightweight way to acquire an intention about an interaction. Draw them on a whiteboard, alter them as needed, and erase them when they've served their purpose. [1]
+
+&lt;/blockquote&gt;
+
+&lt;p&gt;To illustrate what sequence diagrams are, let’s define two classes:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/c950f384ee15a48d44e7b51c1de94c4a.js?file=sequence_diagrams_01.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;And a third class that depends on them:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/c950f384ee15a48d44e7b51c1de94c4a.js?file=sequence_diagrams_02.rb&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Below, is a sequence diagram that illustrates the above code:&lt;/p&gt;
+
+&lt;div style=&quot;width:100%;text-align:center;margin-bottom:40px&quot;&gt;
+    &lt;img style=&quot;max-width: 100%&quot; src=&quot;/assets/sequence.png&quot; alt=&quot;Sequence diagram&quot; /&gt;
+    &lt;br /&gt;
+    &lt;caption align=&quot;bottom&quot;&gt;Sequence diagram&lt;/caption&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Object C sends the message &lt;code&gt;call&lt;/code&gt; to object A (invokes a method &lt;code&gt;call&lt;/code&gt; on object A).&lt;/p&gt;
+
+&lt;p&gt;Object A responds returning &lt;code&gt;result&lt;/code&gt; to object.&lt;/p&gt;
+
+&lt;p&gt;Then, object C calls object B passing the obtained result as an argument and so on.&lt;/p&gt;
+
+&lt;p&gt;What else can we see besides the interaction between the objects? We can see which methods are being used, so the public interface of each object becomes clear. And, along with that: the boundaries between the objects and their responsibilities.&lt;/p&gt;
+
+&lt;p&gt;Thanks to that, looking at a sequence diagram helps to &lt;strong&gt;develop a quality design&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-to-draw-sequence-diagrams-during-remote-meetings&quot;&gt;How to draw sequence diagrams during remote meetings?&lt;/h3&gt;
+
+&lt;p&gt;Sequence diagrams, during a design process, usually need to be redrawn and changed. They evolve back-and-forth while a team is brainstorming and trying to find the best design. There are tools that allow for the drawing of sequence diagrams by dragging-and-dropping boxes and drawing arrows. However, I couldn’t imagine using them as drawing takes too much time and the listeners would lose their patience.&lt;/p&gt;
+
+&lt;p&gt;I was searching for a tool that would give me the possibility to efficiently adjust the diagram in “real time” - on the fly, while elaborating and interacting with others. Take a look:&lt;/p&gt;
+
+&lt;div class=&quot;video-container&quot;&gt;&lt;iframe src=&quot;https://www.youtube.com/embed/ZHBBLSA3cFk?rel=0&quot; allowfullscreen=&quot;allowfullscreen&quot; width=&quot;560&quot; height=&quot;315&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;
+
+&lt;p&gt;As you watched the video above, you would have seen me typing code. The diagram was generated on the fly, as I was typing the commands into the editor, making the whole experience pretty interactive. I was using a standard called &lt;a href=&quot;http://plantuml.com/sequence-diagram&quot;&gt;PlantUML&lt;/a&gt; &lt;a href=&quot;#anchor-3&quot;&gt;[3]&lt;/a&gt; with RubyMine &lt;a href=&quot;https://plugins.jetbrains.com/plugin/7017-plantuml-integration&quot;&gt;IDE plugin&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;basic-plantuml-syntax-for-sequence-diagrams&quot;&gt;Basic PlantUML syntax for sequence diagrams&lt;/h3&gt;
+
+&lt;p&gt;First of all, mark the beginning and end of the diagram by keywords &lt;code&gt;@startuml&lt;/code&gt; and &lt;code&gt;@enduml&lt;/code&gt;.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/c950f384ee15a48d44e7b51c1de94c4a.js?file=sequence_diagrams_03.puml&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Then draw the diagram putting each step in a separate line and using arrows &lt;code&gt;--&amp;gt;&lt;/code&gt;, &lt;code&gt;&amp;lt;--&lt;/code&gt; to indicate the direction of the communication.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/c950f384ee15a48d44e7b51c1de94c4a.js?file=sequence_diagrams_04.puml&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;To show the processing use: &lt;code&gt;activate&lt;/code&gt; and &lt;code&gt;deactivate&lt;/code&gt; keywords.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/c950f384ee15a48d44e7b51c1de94c4a.js?file=sequence_diagrams_05.puml&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Notes can be added by using &lt;code&gt;note&lt;/code&gt; keyword.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/maicher/c950f384ee15a48d44e7b51c1de94c4a.js?file=sequence_diagrams_06.puml&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;The whole syntax is described on the PlantUML website.&lt;/p&gt;
+
+&lt;p&gt;[1] Sandi Metz, &lt;em&gt;Practical Object-Oriented Design in Ruby&lt;/em&gt;, Addison-Wesley, 2013, p.66&lt;/p&gt;
 </description>
         <pubDate>Thu, 01 Feb 2018 14:11:04 +0100</pubDate>
         <link>http://localhost:4000/sequence-diagrams.html</link>
@@ -51,8 +208,6 @@ It’s about sequence diagrams. What they are and how to draw the conveniently.&
         <category>uml diagrams</category>
         
         <category>ruby</category>
-        
-        <category>oop</category>
         
         <category>software development</category>
         
