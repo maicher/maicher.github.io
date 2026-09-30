@@ -6,6 +6,7 @@ author: Krzysztof Maicher
 date: 2018-11-24 10:01:04
 categories:
 tags: [ruby, software development]
+redirect_to: https://kmsoft.pl/blog/different-approaches-to-handling-service-objects-returns/
 ---
 
 There is this one common problem with Rails applications - over time _ActiveRecord models_ become too big and too hard to maintain. It happens because they tend to have too many responsibilities. To avoid overloading _ActiveRecord models_ there is [a guideline](https://codeclimate.com/blog/7-ways-to-decompose-fat-activerecord-models/) to extract some of the logic to service objects.

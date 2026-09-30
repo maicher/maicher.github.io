@@ -1,6 +1,7 @@
 plugins:
   - jekyll-paginate
   - jekyll-gist
+  - jekyll-redirect-from
 
 title: Krzysztof Maicher
 email: krzysztof.maicher@gmail.com

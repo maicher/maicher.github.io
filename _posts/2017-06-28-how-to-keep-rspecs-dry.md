@@ -6,6 +6,7 @@ author: Krzysztof Maicher
 date: 2017-06-28 16:00:00
 categories:
 tags: [ruby, rspec, dry]
+redirect_to: https://kmsoft.pl/blog/how-to-keep-rspecs-dry/
 ---
 
 ### Intro

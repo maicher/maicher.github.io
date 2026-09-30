@@ -6,6 +6,7 @@ author: Krzysztof Maicher
 date: 2016-06-29 08:24:10
 categories:
 tags: [ruby, rails, migrations, psql, PostgreSQL, MySQL]
+redirect_to: https://kmsoft.pl/blog/verifying-database-schema-in-console/
 ---
 
 In Rails we have a `schema.rb` file, where we can check, how our database looks like.

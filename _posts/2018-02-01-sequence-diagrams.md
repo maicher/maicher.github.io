@@ -6,6 +6,7 @@ author: Krzysztof Maicher
 date: 2018-02-01 13:11:04
 categories:
 tags: [sequence diagrams, uml diagrams, ruby, software development]
+redirect_to: https://kmsoft.pl/blog/sequence-diagrams/
 ---
 
 What is the most convenient way of communicating a design idea to another developer? In my opinion - drawing it. However, when you are working remotely it's not as easy as taking a marker and walking to a whiteboard.

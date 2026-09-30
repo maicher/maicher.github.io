@@ -6,6 +6,7 @@ author: Krzysztof Maicher
 date: 2016-07-12 09:11:04
 categories:
 tags: [ruby, rails, freelance, angular, angularjs, application, web application, software development]
+redirect_to: https://kmsoft.pl/blog/freelance-ruby-or-rails-application-development/
 ---
 
 

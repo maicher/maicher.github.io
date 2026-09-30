@@ -6,6 +6,7 @@ author: Krzysztof Maicher
 date: 2016-08-03 20:00:00
 categories:
 tags: [Ruby, Rails, database, PostgreSQL]
+redirect_to: https://kmsoft.pl/blog/how-to-design-a-solid-database-for-rails-application/
 ---
 
 ### Introduction
